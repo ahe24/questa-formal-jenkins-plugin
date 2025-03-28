@@ -1,0 +1,732 @@
+
+Questa CDC Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+
+-----------------------------------------------------------------
+Clock Domain Crossing Analysis Report.
+
+Created Wed Mar 26 16:28:23 2025
+-----------------------------------------------------------------
+
+
+=================================================================
+Section 1  : Clock Information
+Section 2  : Reset Information
+Section 3  : CDC Results
+Section 4  : Custom Synchronization
+Section 5  : Custom Synchronizers without External Crossings
+Section 6  : Modal Analysis Information
+Section 7  : Modal Design Information
+Section 8  : Constant Information
+Section 9  : Design Information
+Section 10 : Port Domain Information
+=================================================================
+
+
+=================================================================
+Section 1 : Clock Information
+=================================================================
+
+Clock Group Summary for 'demo_top' 
+==================================
+Total Number of Clock Groups         : 3
+ 1. User-Specified                   :(3)
+ 2. Inferred                         :(0)
+    2.1 Primary                      : 0
+    2.2 Undriven                     : 0
+    2.3 Blackbox                     : 0
+    2.4 Gated Mux                    : 0
+    2.5 Gated Combo                  : 0
+ 3. Ignored                          :(0)
+
+
+=================================================================
+1. User-Specified (3)
+=================================================================
+Group     0(35 Register Bits, 0 Latch Bits)
+-----------
+cpu_clk_in (35, 0)
+  cpu_clk (35, 0)
+
+Group     1(121 Register Bits, 0 Latch Bits)
+-----------
+core_clk_in (121, 0)
+  core_clk (121, 0)
+    fifo_1_d.wr_clk (36, 0)
+      fifo_1_d.u0.Wclk (0, 0)
+    fifo_0_h.wr_clk (36, 0)
+      fifo_0_h.u0.Wclk (0, 0)
+
+Group     2(148 Register Bits, 0 Latch Bits)
+-----------
+mac_clk_in (148, 0)
+  mac_clk (148, 0)
+    fifo_1_d.rd_clk (44, 0)
+      fifo_1_d.u0.Rclk (8, 0)
+    fifo_0_h.rd_clk (44, 0)
+      fifo_0_h.u0.Rclk (8, 0)
+    crc_1.clk (24, 0)
+
+
+=================================================================
+2. Inferred (0)
+=================================================================
+
+2.1 Primary (0)
+-----------------------------------------------------------------
+None
+
+2.2 Undriven (0)
+-----------------------------------------------------------------
+None
+
+2.3 Blackbox (0)
+-----------------------------------------------------------------
+None
+
+2.4 Gated Mux (0)
+-----------------------------------------------------------------
+None
+
+2.5 Gated Combo (0)
+-----------------------------------------------------------------
+None
+
+=================================================================
+3. Ignored(0)
+=================================================================
+None
+
+
+=================================================================
+Section 2 : Reset Information
+=================================================================
+
+Reset Tree Summary for 'demo_top' 
+==================================
+Total Number of Resets               : 2
+ 1. User-Specified                   :(0)
+ 2. Inferred                         :(2)
+   2.1 Asynchronous                  :(2)
+     2.1.1 Primary                   : 2
+     2.1.2 Blackbox                  : 0
+     2.1.3 Undriven                  : 0
+     2.1.4 Mux                       : 0
+     2.1.5 Combo                     : 0
+     2.1.6 Register/Latch            : 0
+   2.2 Asynchronous & Synchronous    :(0)
+   2.3 Synchronous                   :(0)
+ 3. Ignored                          :(0)
+
+
+
+Reset Tree Notations: 
+    A  --> Asynchronous Reset
+    H  --> Active High Reset
+    I  --> Ignored 
+    L  --> Active Low Reset
+    P  --> Inferred from Reset Port
+    PD --> Power Domain
+    S  --> Synchronous Reset
+    Se --> Set 
+    U  --> User Specified 
+    V  --> Virtual Reset 
+
+=================================================================
+1. User-Specified (0)
+=================================================================
+None
+
+=================================================================
+2. Inferred (2)
+=================================================================
+
+-----------------------------------------------------------------
+2.1 Asynchronous (2)
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+2.1.1 Primary (2)
+-----------------------------------------------------------------
+Group       1: rst
+-------------------
+rst <rst:A,L><rst:Se,A,L> (175 Register Bits, 0 Latch Bits)
+  crc_1.rst <rst:A,L>
+  fifo_0_h.rst <rst:A,L>
+    fifo_0_h.rd_rst <rst:S,L>
+    fifo_0_h.wr_rst <rst:S,L>
+  fifo_1_d.rst <rst:A,L>
+    fifo_1_d.rd_rst <rst:S,L>
+    fifo_1_d.wr_rst <rst:S,L>
+
+Group       2: clr
+-------------------
+clr <clr:Se,A,H> (8 Register Bits, 0 Latch Bits)
+  fifo_0_h.clr 
+  fifo_1_d.clr 
+
+
+-----------------------------------------------------------------
+2.1.2 Blackbox (0)
+-----------------------------------------------------------------
+None
+
+-----------------------------------------------------------------
+2.1.3 Undriven (0)
+-----------------------------------------------------------------
+None
+
+-----------------------------------------------------------------
+2.1.4 Mux (0)
+-----------------------------------------------------------------
+None
+
+-----------------------------------------------------------------
+2.1.5 Combo (0)
+-----------------------------------------------------------------
+None
+
+-----------------------------------------------------------------
+2.1.6 Register/Latch (0)
+-----------------------------------------------------------------
+None
+
+-----------------------------------------------------------------
+2.2 Asynchronous & Synchronous (0)
+-----------------------------------------------------------------
+None
+
+-----------------------------------------------------------------
+2.3 Synchronous (0)
+-----------------------------------------------------------------
+None
+
+=================================================================
+3. Ignored (0)
+=================================================================
+None
+
+=================================================================
+Section 3 : CDC Results
+=================================================================
+CDC Summary
+=================================================================
+-----------------------------------------------------------------
+Total number of checks                                       (46)
+-----------------------------------------------------------------
+
+Violations (30)
+-----------------------------------------------------------------
+Combinational logic before synchronizer.                     (2)
+Multiple-bit signal across clock domain boundary.            (1)
+Single Source Reconvergence of synchronizers.                (26)
+Reconvergence of multiple TX clock synchronizers.            (1)
+
+Cautions (3)
+-----------------------------------------------------------------
+DMUX synchronization.                                        (2)
+Reconvergence of bus bits and other synchronizers.           (1)
+
+Evaluations (9)
+-----------------------------------------------------------------
+Single-bit signal synchronized by DFF synchronizer.          (3)
+Multiple-bit signal synchronized by DFF synchronizer.        (4)
+FIFO synchronization.                                        (2)
+
+Resolved - Waived or Verified Status (0)
+-----------------------------------------------------------------
+<None>
+
+Proven (4)
+-----------------------------------------------------------------
+Single-bit signal synchronized by DFF synchronizer.          (3)
+Pulse Synchronization.                                       (1)
+
+Filtered (0)
+-----------------------------------------------------------------
+<None>
+
+
+Violations
+=================================================================
+Combinational logic before synchronizer. (combo_logic)
+-----------------------------------------------------------------
+mac_clk_in : end : check_en_r1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 337)
+	cpu_clk_in : start : err_thrs (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 109) (ID:combo_logic_85239) (Status : uninspected)
+	Base Type : TWO DFF SYNCHRONIZER
+	cpu_clk_in : start : pass_en[1] (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 110) (ID:combo_logic_46571) (Status : uninspected)
+	Base Type : TWO DFF SYNCHRONIZER
+
+
+Multiple-bit signal across clock domain boundary. (multi_bits)
+-----------------------------------------------------------------
+cpu_clk_in : start : crc_seed[7:1] (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 111)
+	mac_clk_in : end : crc_1.crc_16 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 486) (ID:multi_bits_76265) (Status : uninspected)
+
+
+Single Source Reconvergence of synchronizers. (single_source_reconvergence)
+-----------------------------------------------------------------
+core_clk_in : end : fifo_0_h.full (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 300) (ID:single_source_reconvergence_95847) (Status : uninspected)
+	core_clk_in : start : fifo_0_h.rp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : diverge : fifo_0_h.rd_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 189) (Depth:1)
+
+core_clk_in : end : fifo_0_h.full (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 300) (ID:single_source_reconvergence_12903) (Status : uninspected)
+	core_clk_in : start : fifo_0_h.rp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : diverge : fifo_0_h.rd_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 171) (Depth:1)
+
+core_clk_in : end : fifo_0_h.full (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 300) (ID:single_source_reconvergence_49639) (Status : uninspected)
+	core_clk_in : start : fifo_0_h.rp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_0_h.rp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_62001) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : diverge : fifo_0_h.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (Depth:1)
+
+mac_clk_in : end : fifo_0_h.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (ID:single_source_reconvergence_28273) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 242) (Depth:1)
+
+mac_clk_in : end : fifo_0_h.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (ID:single_source_reconvergence_34513) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wr_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 198) (Depth:1)
+
+mac_clk_in : end : fifo_0_h.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (ID:single_source_reconvergence_58673) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wr_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 180) (Depth:1)
+
+mac_clk_in : end : fifo_0_h.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266) (ID:single_source_reconvergence_93872) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 242) (Depth:1)
+
+mac_clk_in : end : fifo_0_h.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266) (ID:single_source_reconvergence_56992) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wr_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 198) (Depth:1)
+
+mac_clk_in : end : fifo_0_h.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266) (ID:single_source_reconvergence_58776) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wr_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 180) (Depth:1)
+
+core_clk_in : end : fifo_1_d.full (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 300) (ID:single_source_reconvergence_8875) (Status : uninspected)
+	core_clk_in : start : fifo_1_d.rp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : diverge : fifo_1_d.rd_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 189) (Depth:1)
+
+core_clk_in : end : fifo_1_d.full (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 300) (ID:single_source_reconvergence_26955) (Status : uninspected)
+	core_clk_in : start : fifo_1_d.rp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : diverge : fifo_1_d.rd_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 171) (Depth:1)
+
+core_clk_in : end : fifo_1_d.full (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 300) (ID:single_source_reconvergence_62667) (Status : uninspected)
+	core_clk_in : start : fifo_1_d.rp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : start : fifo_1_d.rp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_94611) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : diverge : fifo_1_d.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (Depth:1)
+
+mac_clk_in : end : fifo_1_d.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (ID:single_source_reconvergence_35728) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 242) (Depth:1)
+
+mac_clk_in : end : fifo_1_d.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (ID:single_source_reconvergence_33776) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wr_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 198) (Depth:1)
+
+mac_clk_in : end : fifo_1_d.rp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 259) (ID:single_source_reconvergence_57936) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wr_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 180) (Depth:1)
+
+mac_clk_in : end : fifo_1_d.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266) (ID:single_source_reconvergence_27312) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 242) (Depth:1)
+
+mac_clk_in : end : fifo_1_d.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266) (ID:single_source_reconvergence_91392) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wr_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 198) (Depth:1)
+
+mac_clk_in : end : fifo_1_d.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266) (ID:single_source_reconvergence_92152) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wr_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 180) (Depth:1)
+
+mac_clk_in : end : pass_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 174) (ID:single_source_reconvergence_5917) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 242) (Depth:1)
+
+mac_clk_in : end : pass_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 174) (ID:single_source_reconvergence_99159) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wr_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 198) (Depth:1)
+
+mac_clk_in : end : pass_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 174) (ID:single_source_reconvergence_81039) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_0_h.wr_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 180) (Depth:1)
+
+mac_clk_in : end : pass_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 174) (ID:single_source_reconvergence_92477) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wp_bin (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 242) (Depth:1)
+
+mac_clk_in : end : pass_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 174) (ID:single_source_reconvergence_8503) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wr_clr (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 198) (Depth:1)
+
+mac_clk_in : end : pass_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 174) (ID:single_source_reconvergence_90383) (Status : uninspected)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : fifo_1_d.wr_rst (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 180) (Depth:1)
+
+mac_clk_in : end : rx_masked_data[0] (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 407) (ID:single_source_reconvergence_52610) (Status : uninspected)
+	mac_clk_in : start : tx_eop_r2 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 380) (Synchronizer ID:two_dff_54238) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : start : tx_mask_valid_r2 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 312) (Synchronizer ID:two_dff_52495) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : tx_state (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 233) (Depth:1)
+
+mac_clk_in : end : rx_payload_en (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 404) (ID:single_source_reconvergence_60450) (Status : uninspected)
+	mac_clk_in : start : tx_eop_r2 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 380) (Synchronizer ID:two_dff_54238) (Depth:0) (Reconvergence Severity:Violation)
+	mac_clk_in : start : tx_sop_r2 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 369) (Synchronizer ID:two_dff_11314) (Depth:0) (Reconvergence Severity:Violation)
+	core_clk_in : diverge : tx_state (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 233) (Depth:1)
+
+
+Reconvergence of multiple TX clock synchronizers. (reconvergence_multi_tx_clock)
+-----------------------------------------------------------------
+mac_clk_in : end : mask (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 364) (ID:reconvergence_multi_tx_clock_56063) (Status : uninspected)
+	cpu_clk_in : start : pass_en[0] (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 79) (Synchronizer ID:two_dff_81824) (Depth:1) (Reconvergence Severity:Violation)
+	core_clk_in : start : tx_mask_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 90) (Synchronizer ID:two_dff_52495) (Depth:0) (Reconvergence Severity:Violation)
+
+
+
+Cautions
+=================================================================
+DMUX synchronization. (dmux)
+-----------------------------------------------------------------
+cpu_clk_in : start : fstp[7:1] (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 112)
+	mac_clk_in : end : crc_1.scramble (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 461) (ID:dmux_30303) (Status : uninspected)
+		Synchronizer ID : two_dff_5840
+
+core_clk_in : start : tx_mask_d (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 237)
+	mac_clk_in : end : mask (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 364) (ID:dmux_12402) (Status : uninspected)
+		Synchronizer ID : two_dff_52495
+
+
+Reconvergence of bus bits and other synchronizers. (reconvergence_mixed)
+-----------------------------------------------------------------
+mac_clk_in : end : pass_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 174) (ID:reconvergence_mixed_89923) (Status : uninspected)
+	mac_clk_in : start : fifo_0_h.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_0_h.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_0_h.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_0_h.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_0_h.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_53361) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_1_d.wp_s[0] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_1_d.wp_s[1] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_1_d.wp_s[2] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_1_d.wp_s[3] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Caution)
+	mac_clk_in : start : fifo_1_d.wp_s[4] (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 148) (Synchronizer ID:bus_two_dff_80275) (Depth:1) (Reconvergence Severity:Caution)
+
+
+
+Evaluations
+=================================================================
+Single-bit signal synchronized by DFF synchronizer. (two_dff)
+-----------------------------------------------------------------
+cpu_clk_in : start : init_done (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 106)
+	mac_clk_in : end : init_done_r1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 123) (ID:two_dff_5840) (Status : uninspected)
+	Synchronizer length : 2
+	core_clk_in : end : init_done_rsol1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 132) (ID:two_dff_24752) (Status : uninspected)
+	Synchronizer length : 2
+
+cpu_clk_in : start : pass_en[0] (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 110)
+	mac_clk_in : end : pass_en0_r1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 327) (ID:two_dff_81824) (Status : uninspected)
+	Synchronizer length : 2
+
+
+Multiple-bit signal synchronized by DFF synchronizer. (bus_two_dff)
+-----------------------------------------------------------------
+mac_clk_in : start : fifo_0_h.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266)
+	core_clk_in : end : fifo_0_h.rp_s1 (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 285) (ID:bus_two_dff_62001) (Status : uninspected)
+	Synchronizer length : 2
+
+core_clk_in : start : fifo_0_h.wp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 249)
+	mac_clk_in : end : fifo_0_h.wp_s1 (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 281) (ID:bus_two_dff_53361) (Status : uninspected)
+	Synchronizer length : 2
+
+mac_clk_in : start : fifo_1_d.rp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 266)
+	core_clk_in : end : fifo_1_d.rp_s1 (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 285) (ID:bus_two_dff_94611) (Status : uninspected)
+	Synchronizer length : 2
+
+core_clk_in : start : fifo_1_d.wp_gray (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 249)
+	mac_clk_in : end : fifo_1_d.wp_s1 (/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v : 281) (ID:bus_two_dff_80275) (Status : uninspected)
+	Synchronizer length : 2
+
+
+FIFO synchronization. (fifo)
+-----------------------------------------------------------------
+core_clk_in : start : fifo_0_h.u0.data (/var/lib/jenkins/workspace/test1/src/vlog/dpmem2clk.v : 80) (ID:fifo_683) (Status : uninspected)
+	mac_clk_in : end : fifo_0_h.u0.outport (/var/lib/jenkins/workspace/test1/src/vlog/dpmem2clk.v : 68)
+	Read pointer synchronizer ID : bus_two_dff_62001
+	Read pointer : fifo_0_h.rp_bin
+	Write pointer synchronizer ID : bus_two_dff_53361
+	Write pointer : fifo_0_h.wp_bin
+
+core_clk_in : start : fifo_1_d.u0.data (/var/lib/jenkins/workspace/test1/src/vlog/dpmem2clk.v : 80) (ID:fifo_23791) (Status : uninspected)
+	mac_clk_in : end : fifo_1_d.u0.outport (/var/lib/jenkins/workspace/test1/src/vlog/dpmem2clk.v : 68)
+	Read pointer synchronizer ID : bus_two_dff_94611
+	Read pointer : fifo_1_d.rp_bin
+	Write pointer synchronizer ID : bus_two_dff_80275
+	Write pointer : fifo_1_d.wp_bin
+
+
+
+Resolved - Waived or Verified Status
+=================================================================
+<none>
+
+Proven
+=================================================================
+Single-bit signal synchronized by DFF synchronizer. (two_dff)
+-----------------------------------------------------------------
+core_clk_in : start : tx_eop (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 239)
+	mac_clk_in : end : tx_eop_r1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 384) (ID:two_dff_54238) (Status : uninspected)
+	Synchronizer length : 2
+
+core_clk_in : start : tx_mask_valid (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 240)
+	mac_clk_in : end : tx_mask_valid_r1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 316) (ID:two_dff_52495) (Status : uninspected)
+	Synchronizer length : 2
+
+core_clk_in : start : tx_sop (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 238)
+	mac_clk_in : end : tx_sop_r1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 373) (ID:two_dff_11314) (Status : uninspected)
+	Synchronizer length : 2
+
+
+Pulse Synchronization. (pulse_sync)
+-----------------------------------------------------------------
+core_clk_in : start : tx_en (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 241)
+	mac_clk_in : end : tx_en_r1 (/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v : 302) (ID:pulse_sync_13276) (Status : uninspected)
+	Base Type : TWO DFF SYNCHRONIZER
+
+
+
+Filtered
+=================================================================
+<none>
+
+
+
+
+=================================================================
+Section 4 : Custom Synchronization
+=================================================================
+
+
+Module                Instance            
+------------------------------------
+None
+
+
+
+=================================================================
+Section 5 : Custom Synchronizers without External Crossings
+=================================================================
+
+Module                Instance            
+------------------------------------
+None
+
+
+=================================================================
+Section 6 : Modal Analysis Information
+=================================================================
+
+Mode information
+================
+
+None
+
+User Modes
+==========
+
+None
+
+Inferred Modes
+==============
+
+None
+
+
+=================================================================
+Section 7 : Modal Design Information
+=================================================================
+
+
+=================================================================
+Section 8 : Constant Information
+=================================================================
+
+Signal                         value                         
+-----------------------------------------------------------------
+scan_mode                      1'b0                          
+
+
+=================================================================
+Section 9  : Design Information
+=================================================================
+
+Design Information
+--------------------------
+Design Complexity Number          = 843
+Number of CDC Signals             = 46
+Number of blackboxes              = 0
+Number of Register bits           = 304
+Number of Latch bits              = 0
+Number of RAMs                    = 2
+Number of Empty Modules           = 0
+Number of Unresolved Modules      = 0
+Number of Gate-Level Modules      = 0
+Number of Dead-end Registers      = 17
+Number of Unclocked Registers     = 0
+Number of Unclocked Latches       = 0
+
+Detail Design Information
+=========================
+RAMs: 
+----- 
+Module                         Signal                                   Dimension 
+-----------------------------------------------------------------------------------
+dpmem2clk                      fifo_1_d.u0.data                         16 x 8
+dpmem2clk                      fifo_0_h.u0.data                         16 x 8
+
+
+Dead-end Registers: 
+------------------- 
+  mask_check (1)
+  fifo_1_d.full_wc (1)
+  fifo_1_d.rp_bin_xr (4)
+  fifo_1_d.d1 (4)
+  fifo_1_d.wr_level (2)
+  fifo_1_d.wp_bin_xr (4)
+  fifo_1_d.d2 (4)
+  fifo_1_d.full_rc (1)
+  fifo_1_d.rd_level (2)
+  fifo_0_h.full_wc (1)
+  fifo_0_h.rp_bin_xr (4)
+  fifo_0_h.d1 (4)
+  fifo_0_h.wr_level (2)
+  fifo_0_h.wp_bin_xr (4)
+  fifo_0_h.d2 (4)
+  fifo_0_h.full_rc (1)
+  fifo_0_h.rd_level (2)
+
+
+
+
+=================================================================
+Section 10 : Port Domain Information
+=================================================================
+Port                Direction     Constraints    Clock Domain             Type      
+-----------------------------------------------------------------------------------
+mac_clk_in            input         Clock          { mac_clk_in }          User    
+core_clk_in           input         Clock          { core_clk_in }         User    
+cpu_clk_in            input         Clock          { cpu_clk_in }          User    
+rst                   input         Reset          { cpu_clk_in core_clk_in mac_clk_in }    Questa CDC
+clr                   input         Reset          { core_clk_in mac_clk_in }    Questa CDC
+din                   input                        { core_clk_in }       Questa CDC
+we                    input                        { core_clk_in }       Questa CDC
+we_1                  input                        { core_clk_in }       Questa CDC
+cpu_addr              input                        { cpu_clk_in }        Questa CDC
+cs                    input                        { cpu_clk_in }        Questa CDC
+cpu_data              input                        { cpu_clk_in }        Questa CDC
+init_done_in          input                        { cpu_clk_in }        Questa CDC
+hdrin                 input                        { core_clk_in }       Questa CDC
+scan_mode             input         Constant       { <constant> }          User    
+scan_clk              input                        { <undef> }           Questa CDC
+full                  output                       { core_clk_in }       Questa CDC
+full_1                output                       { core_clk_in }       Questa CDC
+pass                  output                       { mac_clk_in }        Questa CDC
+pass_valid            output                       { mac_clk_in }        Questa CDC
+crc_16                output                       { mac_clk_in }        Questa CDC
+rx_payload_en         output                       { mac_clk_in }        Questa CDC
+rx_masked_data        output                       { mac_clk_in }        Questa CDC
+rx_mask_en            output                       { mac_clk_in }        Questa CDC
+rx_pass               output                       { mac_clk_in }        Questa CDC
+rx_check              output                       { mac_clk_in }        Questa CDC
+

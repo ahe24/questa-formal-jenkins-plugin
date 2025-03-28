@@ -1,0 +1,290 @@
+====================================================================================================
+Lint Check Report
+Questa Lint  Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+
+Timestamp            : Wed Mar 26 14:24:27 2025
+Description          : Report for referring checks count, check violations details, and  design information
+Design               : demo_top
+Database             : /var/lib/jenkins/workspace/test1/Lint_Results/lint.db
+Design Quality Score : 98.7%
+
+Sections:
+   Section 1 : Check Summary
+   Section 2 : Check Details
+   Section 3 : Design Information
+====================================================================================================
+
+
+====================================================================================================
+Section 1 : Check Summary
+====================================================================================================
+-------------
+| Error (7) |
+-------------
+  assign_width_underflow                  : 6
+  case_default_missing                    : 1
+
+----------------
+| Warning (12) |
+----------------
+  bus_bits_not_read                       : 4
+  logical_operator_on_multi_bit           : 1
+  ordered_port_connection                 : 3
+  unconnected_inst_output                 : 4
+
+-------------
+| Info (51) |
+-------------
+  async_reset_active_high                 : 1
+  const_reg_data                          : 8
+  flop_without_control                    : 30
+  fsm_without_one_hot_encoding            : 1
+  module_output_not_registered            : 1
+  var_set_not_read                        : 5
+  always_signal_assign_large              : 2
+  multi_ports_in_single_line              : 3
+
+----------------
+| Resolved (0) |
+----------------
+
+
+====================================================================================================
+Section 2 : Check Details
+====================================================================================================
+-------------
+| Error (7) |
+-------------
+
+Check: assign_width_underflow [Category: Rtl Design Style] (6)
+       [Message: Width of assignment RHS is less than width of LHS.  LHS Expression '<lhs_expression>', LHS Width '<lhs_width>', RHS Width '<rhs_width>', Module '<module>', File '<file>', Line '<line>'.]
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+assign_width_underflow: [uninspected] Width of assignment RHS is less than width of LHS.  LHS Expression 'tx_state', LHS Width '3', RHS Width '2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '222'. [RTL ID:c46f48f8_00300] [Example Hierarchy:demo_top]
+
+assign_width_underflow: [uninspected] Width of assignment RHS is less than width of LHS.  LHS Expression 'next_tx_state', LHS Width '3', RHS Width '2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '250'. [RTL ID:c46f48f8_00300] [Example Hierarchy:demo_top]
+    1 more occurrence at: line 287.
+
+assign_width_underflow: [uninspected] Width of assignment RHS is less than width of LHS.  LHS Expression 'next_tx_state', LHS Width '3', RHS Width '2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '262'. [RTL ID:3c7e2906_00300] [Example Hierarchy:demo_top]
+
+assign_width_underflow: [uninspected] Width of assignment RHS is less than width of LHS.  LHS Expression 'next_tx_state', LHS Width '3', RHS Width '2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '269'. [RTL ID:cd3eb89d_00300] [Example Hierarchy:demo_top]
+    1 more occurrence at: line 282.
+
+assign_width_underflow: [uninspected] Width of assignment RHS is less than width of LHS.  LHS Expression 'next_tx_state', LHS Width '3', RHS Width '2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '278'. [RTL ID:2dc60cd1_00300] [Example Hierarchy:demo_top]
+
+assign_width_underflow: [uninspected] Width of assignment RHS is less than width of LHS.  LHS Expression 'rx_masked_data', LHS Width '8', RHS Width '1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '407'. [RTL ID:8fb85271_00300] [Example Hierarchy:demo_top]
+
+
+Check: case_default_missing [Category: Simulation] (1)
+       [Message: Case statement is missing the default clause or does not cover all possible scenarios, which infers a latch. Module '<module>', File '<file>', Line '<line>'.]
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+case_default_missing: [uninspected] Case statement is missing the default clause or does not cover all possible scenarios, which infers a latch. Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '258'. [RTL ID:594e2c7_00301] [Example Hierarchy:demo_top]
+
+
+
+----------------
+| Warning (12) |
+----------------
+
+Check: bus_bits_not_read [Category: Rtl Design Style] (4)
+       [Message: Bus has one or more bits that are not read. Bus unread bits '<bits>', Module '<module>', File '<file>', Line '<line>'.]
+-----------------------------------------------------------------------------------------------------------------------------------------
+bus_bits_not_read: [uninspected] Bus has one or more bits that are not read. Bus unread bits 'p[0]', Module 'crc_16_calc', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '444'. [Example Hierarchy:demo_top.crc_1]
+
+bus_bits_not_read: [uninspected] Bus has one or more bits that are not read. Bus unread bits 'q[0]', Module 'crc_16_calc', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '462'. [Example Hierarchy:demo_top.crc_1]
+
+bus_bits_not_read: [uninspected] Bus has one or more bits that are not read. Bus unread bits 'd1[1:0]', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '156'. [Example Hierarchy:demo_top.fifo_0_h]
+
+bus_bits_not_read: [uninspected] Bus has one or more bits that are not read. Bus unread bits 'd2[1:0]', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '156'. [Example Hierarchy:demo_top.fifo_0_h]
+
+
+Check: logical_operator_on_multi_bit [Category: Rtl Design Style] (1)
+       [Message: Operand of a logical operator is a multi-bit value. Signal '<signal>', Module '<module>', File '<file>', Line '<line>'.]
+------------------------------------------------------------------------------------------------------------------------------------------
+logical_operator_on_multi_bit: [uninspected] Operand of a logical operator is a multi-bit value. Signal 'dout_1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '407'. [RTL ID:8fb85271_00300] [Example Hierarchy:demo_top]
+
+
+Check: ordered_port_connection [Category: Connectivity] (3)
+       [Message: Instantiation specifies positional ports.  Module '<module>', File '<file>', Line '<line>'.]
+--------------------------------------------------------------------------------------------------------------
+ordered_port_connection: [uninspected] Instantiation specifies positional ports.  Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '155'. [RTL ID:b2c9531c_00300] [Example Hierarchy:demo_top]
+
+ordered_port_connection: [uninspected] Instantiation specifies positional ports.  Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '160'. [RTL ID:5312be51_00300] [Example Hierarchy:demo_top]
+
+ordered_port_connection: [uninspected] Instantiation specifies positional ports.  Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '198'. [RTL ID:6ad9158b_00300] [Example Hierarchy:demo_top]
+
+
+Check: unconnected_inst_output [Category: Connectivity] (4)
+       [Message: Instance output is not connected or drives no logic. Port '<port>', Instance '<instance>', User allowed connections '<type>', Instantiated in module '<module>', File '<file>', Line '<line>'.]
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+unconnected_inst_output: [uninspected] Instance output is not connected or drives no logic. Port 'rd_level', Instance 'fifo_1_d', User allowed connections 'None', Instantiated in module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '155'. [Example Hierarchy:demo_top]
+
+unconnected_inst_output: [uninspected] Instance output is not connected or drives no logic. Port 'wr_level', Instance 'fifo_1_d', User allowed connections 'None', Instantiated in module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '155'. [Example Hierarchy:demo_top]
+
+unconnected_inst_output: [uninspected] Instance output is not connected or drives no logic. Port 'rd_level', Instance 'fifo_0_h', User allowed connections 'None', Instantiated in module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '160'. [Example Hierarchy:demo_top]
+
+unconnected_inst_output: [uninspected] Instance output is not connected or drives no logic. Port 'wr_level', Instance 'fifo_0_h', User allowed connections 'None', Instantiated in module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '160'. [Example Hierarchy:demo_top]
+
+
+
+-------------
+| Info (51) |
+-------------
+
+Check: async_reset_active_high [Category: Clock] (1)
+       [Message: Asynchronous reset is active high. Reset '<reset>', Module '<module>', File '<file>', Line '<line>'.]
+-----------------------------------------------------------------------------------------------------------------------
+async_reset_active_high: [uninspected] Asynchronous reset is active high. Reset 'clr', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '187'. [Example Hierarchy:demo_top.fifo_0_h]
+    3 more occurrences at: line 192, line 196, and line 201.
+
+
+Check: const_reg_data [Category: Connectivity] (8)
+       [Message: Constant value drives register data pin. Signal '<signal>', Module '<module>', File '<file>', Line '<line>'.]
+-------------------------------------------------------------------------------------------------------------------------------
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.rd_rst', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '171'. [Example Hierarchy:demo_top.fifo_1_d]
+
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.rd_rst_r', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '175'. [Example Hierarchy:demo_top.fifo_1_d]
+
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.wr_rst', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '180'. [Example Hierarchy:demo_top.fifo_1_d]
+
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.wr_rst_r', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '184'. [Example Hierarchy:demo_top.fifo_1_d]
+
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.rd_clr', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '189'. [Example Hierarchy:demo_top.fifo_1_d]
+
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.rd_clr_r', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '193'. [Example Hierarchy:demo_top.fifo_1_d]
+
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.wr_clr', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '198'. [Example Hierarchy:demo_top.fifo_1_d]
+
+const_reg_data: [uninspected] Constant value drives register data pin. Signal 'fifo_1_d.wr_clr_r', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '202'. [Example Hierarchy:demo_top.fifo_1_d]
+
+
+Check: flop_without_control [Category: Reset] (30)
+       [Message: Flip-flop does not have any valid control. Valid control(s) '<type>', Signal '<signal>', Module '<module>', File '<file>', Line '<line>'.]
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'init_done_r1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '123'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'init_done_r2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '124'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'init_done_rsol1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '132'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'init_done_rsol2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '133'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_en_r1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '302'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_en_r2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '303'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_en_r3', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '304'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_mask_valid_r1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '316'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_mask_valid_r2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '317'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'pass_en0_r1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '327'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'rx_pass', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '328'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'check_en_r1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '337'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'rx_check', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '338'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_sop_r1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '373'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_sop_r2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '374'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_eop_r1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '384'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'tx_eop_r2', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '385'. [Example Hierarchy:demo_top]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.wp_s1', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '281'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.wp_s', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '282'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.rp_s1', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '285'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.rp_s', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '286'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.empty', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '297'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.full', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '300'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.full_wc', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '313'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.rp_bin_xr', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '314'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.d1', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '315'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.wr_level', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '317'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.wp_bin_xr', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '319'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.d2', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '320'. [Example Hierarchy:demo_top.fifo_1_d]
+
+flop_without_control: [uninspected] Flip-flop does not have any valid control. Valid control(s) 'async_reset, enable, sync_reset', Signal 'fifo_1_d.full_rc', Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '322'. [Example Hierarchy:demo_top.fifo_1_d]
+
+
+Check: fsm_without_one_hot_encoding [Category: Rtl Design Style] (1)
+       [Message: FSM encoding is not one-hot. Module '<module>', File '<file>', Line '<line>'.]
+------------------------------------------------------------------------------------------------
+fsm_without_one_hot_encoding: [uninspected] FSM encoding is not one-hot. Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '259'. [RTL ID:242bb5de_00300] [Example Hierarchy:demo_top]
+
+
+Check: module_output_not_registered [Category: Connectivity] (1)
+       [Message: Module output port is not registered. Port '<port>', Module '<module>', File '<file>', Line '<line>'.]
+------------------------------------------------------------------------------------------------------------------------
+module_output_not_registered: [uninspected] Module output port is not registered. Port 'pass', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '45'. [Example Hierarchy:demo_top]
+
+
+Check: var_set_not_read [Category: Rtl Design Style] (5)
+       [Message: Variable is set, but is not read. Signal '<signal>', Module '<module>', File '<file>', Line '<line>'.]
+------------------------------------------------------------------------------------------------------------------------
+var_set_not_read: [uninspected] Variable is set, but is not read. Signal 'rd_level_1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '156'. [Example Hierarchy:demo_top]
+
+var_set_not_read: [uninspected] Variable is set, but is not read. Signal 'wr_level_1', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '156'. [Example Hierarchy:demo_top]
+
+var_set_not_read: [uninspected] Variable is set, but is not read. Signal 'rd_level', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '161'. [Example Hierarchy:demo_top]
+
+var_set_not_read: [uninspected] Variable is set, but is not read. Signal 'wr_level', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '161'. [Example Hierarchy:demo_top]
+
+var_set_not_read: [uninspected] Variable is set, but is not read. Signal 'mask_check', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '355'. [Example Hierarchy:demo_top]
+
+
+Check: always_signal_assign_large [Category: Rtl Design Style] (2)
+       [Message: Always block has more signal assignments than the specified limit. Total count '<count>', Specified limit '<limit>', Module '<module>', File '<file>', Line '<line>'.]
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+always_signal_assign_large: [uninspected] Always block has more signal assignments than the specified limit. Total count '8', Specified limit '5', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '219'. [Example Hierarchy:demo_top]
+
+always_signal_assign_large: [uninspected] Always block has more signal assignments than the specified limit. Total count '7', Specified limit '5', Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '247'. [Example Hierarchy:demo_top]
+
+
+Check: multi_ports_in_single_line [Category: Rtl Design Style] (3)
+       [Message: Multiple ports are declared in one line. Module '<module>', File '<file>', Line '<line>'.]
+------------------------------------------------------------------------------------------------------------
+multi_ports_in_single_line: [uninspected] Multiple ports are declared in one line. Module 'demo_top', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '29'. [Example Hierarchy:demo_top]
+    1 more occurrence at: line 39.
+
+multi_ports_in_single_line: [uninspected] Multiple ports are declared in one line. Module 'crc_16_calc', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line '433'. [Example Hierarchy:demo_top.crc_1]
+
+multi_ports_in_single_line: [uninspected] Multiple ports are declared in one line. Module 'generic_fifo_dc_gray', File '/var/lib/jenkins/workspace/test1/src/vlog/generic_fifo_dc_gray.v', Line '131'. [Example Hierarchy:demo_top.fifo_0_h]
+    1 more occurrence at: line 150.
+
+
+
+----------------
+| Resolved (0) |
+----------------
+
+
+
+====================================================================================================
+Section 3 : Design Information
+====================================================================================================
+-----------
+| Summary |
+-----------
+  Register Bits                           : 320
+  Latch Bits                              : 0
+  User-specified Blackboxes               : 0
+  Inferred Blackboxes                     : 0
+  Empty Modules                           : 0
+  Unresolved Modules                      : 0
+  Hierarchical IPs                        : 0
+

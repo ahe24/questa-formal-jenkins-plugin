@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Group-Id: io.jenkins.plugins
+Short-Name: questa-formal-result
+Long-Name: Questa Formal Result Plugin
+Plugin-Version: 1.0-SNAPSHOT (private-03/26/2025 13:51-csjo)
+Hudson-Version: 2.361.1
+Jenkins-Version: 2.361.1
+Plugin-Developers: 
+Support-Dynamic-Loading: true
+Plugin-ScmUrl: https://github.com/jenkinsci/plugin-pom/questa-formal-res
+ ult
+Libraries: D:\X2_copilot\questa_plugin1\src\main\resources,D:\X2_copilot
+ \questa_plugin1\target\classes,C:\Users\csjo\.m2\repository\org\webjars
+ \chartjs\3.9.1\chartjs-3.9.1.jar
+Resource-Path: D:\X2_copilot\questa_plugin1\src\main\webapp
+

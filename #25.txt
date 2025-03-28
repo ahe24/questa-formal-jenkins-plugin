@@ -1,0 +1,449 @@
+Started by GitLab push by csjo
+Running as SYSTEM
+Building in workspace /var/lib/jenkins/workspace/test1
+The recommended git tool is: NONE
+using credential csjo
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/test1/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url http://192.168.56.101/csjo/test1.git # timeout=10
+Fetching upstream changes from http://192.168.56.101/csjo/test1.git
+ > git --version # timeout=10
+ > git --version # 'git version 1.8.3.1'
+using GIT_ASKPASS to set credentials gitlab credit
+ > git fetch --tags --progress http://192.168.56.101/csjo/test1.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+skipping resolution of commit remotes/origin/master, since it originates from another repository
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+Checking out Revision b23cd7d7308f62b328884aee9f36400c1401e0ae (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f b23cd7d7308f62b328884aee9f36400c1401e0ae # timeout=10
+Commit message: "added comment again"
+ > git rev-list --no-walk 27f864ee0dce8ca24d6c534e09364b9bd1f7bd1a # timeout=10
+No GitLab connection configured
+[test1] $ /bin/sh -xe /tmp/jenkins2949514383653287581.sh
++ make run_vl
+\rm -rf work modelsim.ini
+\rm -rf Lint_Results
+\rm -rf Output_waived
+\rm -rf Output_bbox
+\rm -rf Output_custom
+\rm -rf Output_compare
+\rm -rf Output_alias
+\rm -rf ip
+\rm -rf NEW
+\rm -rf __pycache__
+\rm -rf qcache
+\rm -rf .qverify
+\rm -rf .visualizer
+\rm -rf visualizer.vstf
+\rm -rf qverify_ui_cmds.tcl
+\rm -rf *.log
+\rm -rf *.prj
+\rm -rf waive*.tcl
+vlib work; 
+vlog -f qs_files/filelist_vl -l compile_vl.log; 
+QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
+Start time: 12:47:57 on Mar 26,2025
+vlog -f qs_files/filelist_vl -l compile_vl.log 
+-- Compiling module tb
+-- Compiling module dpmem2clk
+-- Compiling module generic_fifo_dc_gray
+-- Compiling module demo_top
+-- Compiling module crc_16_calc
+-- Compiling module dff2_sync
+
+Top level modules:
+	tb
+	dff2_sync
+End time: 12:47:57 on Mar 26,2025, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0
+qverify -od Lint_Results -c -do " \
+lint methodology ip -goal release; \
+do qs_files/checks_off.tcl; \
+lint run -d demo_top; \
+lint generate report lint_out -html \
+-show_code_snippet -lines_count_before_violation 7; " 
+# 
+# Questa OneSpin Static & Formal Verification System
+# Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+# 
+# This material contains trade secrets or otherwise
+# confidential information owned by
+# Siemens Industry Software Inc. or its affiliates
+# (collectively, "SISW"), or its licensors. Access
+# to and use of this information is strictly limited
+# as set forth in the customer's applicable
+# agreements with SISW.
+# 
+# Unpublished work. Copyright 2024 Siemens
+# 
+# 
+# Loaded goal 'release'.
+# Command : lint run -d demo_top
+# 
+# Questa OneSpin Static & Formal Verification System
+# Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+# log created Wed Mar 26 12:47:58 2025 by jenkins on test
+# 
+# Executing Command : lint run -d demo_top
+# File: /var/lib/jenkins/workspace/test1/Lint_Results/qverify_cmds.tcl, Line: 10
+# 
+### Starting Step: netlist elaborate ### 
+# 
+## Elaborating Design...
+# Reading MTI mapping for library mapping
+# Writing all MTI mappings to vmap output ...
+# 
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Permission denied. (errno = EACCES)
+# 
+# Errors: 1, Warnings: 0
+# Top level modules:
+# 	demo_top
+# 
+# Analyzing design...
+# -- Loading module z0in_work.demo_top
+# 
+# Performing 361 Lint Checks
+# =============================
+# 
+# Lint Stage 1 of 5 - Pre Design Elaboration (11 checks)
+# -------------------------------------------------------
+# -- Loading module z0in_work.generic_fifo_dc_gray
+# -- Loading module z0in_work.dpmem2clk
+# -- Loading module z0in_work.crc_16_calc
+# Optimizing 4 design-units (inlining 0/6 module instances):
+# -- Optimizing module z0in_work.dpmem2clk(fast)
+# Lint Stage-1 100% complete [Total Progress -   7%]
+# 
+# Lint Stage 2 of 5 - Design Elaboration (265 checks)
+# ----------------------------------------------------
+# -- Optimizing module z0in_work.generic_fifo_dc_gray(fast)
+# Lint Stage-2  25% complete (1 out of 4 modules checked) [Total Progress -   9%]
+# -- Optimizing module z0in_work.crc_16_calc(fast)
+# Lint Stage-2  50% complete (2 out of 4 modules checked) [Total Progress -  14%]
+# -- Optimizing module z0in_work.demo_top(fast)
+# Lint Stage-2  75% complete (3 out of 4 modules checked) [Total Progress -  18%]
+# Optimized design name is zi_opt_def_547285000_1
+# Lint Stage-2 100% complete (4 out of 4 modules checked) [Total Progress -  23%]
+# 
+### Starting Step: netlist create ### 
+# 
+## Synthesizing netlist...
+# 
+# Lint Stage 3 of 5 - Post Design Elaboration (37 checks)
+# --------------------------------------------------------
+# Lint Stage-3  24% complete [Total Progress -  27%]
+# Lint Stage-3  49% complete [Total Progress -  29%]
+# Lint Stage-3  73% complete [Total Progress -  32%]
+# Warning : All files in a library are compiled without -lint du option.  Library 'work'.  [lint-43]
+#         : Compile time check will not work for this library.
+# Lint Stage-3  97% complete [Total Progress -  34%]
+# Lint Stage-3 100% complete [Total Progress -  35%]
+# Analyzing designs.
+# Elaborating module 'dpmem2clk'.
+# Elaborating module 'generic_fifo_dc_gray'.
+# Elaborating module 'crc_16_calc'.
+# Elaborating module 'demo_top'.
+# 
+# Lint Stage 4 of 5 - Design Synthesis (14 checks)
+# -------------------------------------------------
+# Lint Stage-4  21% complete [Total Progress -  67%]
+# Lint Stage-4  43% complete [Total Progress -  69%]
+# Lint Stage-4  64% complete [Total Progress -  71%]
+# Lint Stage-4  86% complete [Total Progress -  73%]
+# Lint Stage-4 100% complete [Total Progress -  75%]
+# Flattening design 'dpmem2clk'.
+# Flattening design 'generic_fifo_dc_gray'.
+# Flattening design 'crc_16_calc'.
+# Flattening design 'demo_top'.
+# 
+# Lint Stage 5 of 5 - Post Design Synthesis (34 checks)
+# ------------------------------------------------------
+# Lint Stage-5  24% complete [Total Progress -  88%]
+# Lint Stage-5  47% complete [Total Progress -  92%]
+# Lint Stage-5  71% complete [Total Progress -  95%]
+# Lint Stage-5  94% complete [Total Progress -  99%]
+# Lint Stage-5 100% complete [Total Progress - 100%]
+# 
+# Lint Checking Completed
+# 
+# Trend Report: Trend directory path is not set, HTML trend report will not be generated.
+# 
+##Time Taken (Synthesis) = 80000.000000 ticks = 0.080000 secs
+# Summary: 1 Warnings in processing "netlist create"
+## Applying Lint Waivers...
+# 
+# Message Summary
+# ---------------------------------------------------------------------------
+# Count  Type     Message ID         Summary
+# ---------------------------------------------------------------------------
+#     1  Warning  lint-43            All files in a library are compiled without -lint du option.
+# 
+# Final Process Statistics: Max memory 618MB, CPU time 2s, Total time 3s
+# Result Summary
+# -----------------------------------------------------------
+# Error (7)
+# -----------------------------------------------------------
+#   assign_width_underflow                  :6
+#   case_default_missing                    :1
+# 
+# -----------------------------------------------------------
+# Warning (12)
+# -----------------------------------------------------------
+#   bus_bits_not_read                       :4
+#   logical_operator_on_multi_bit           :1
+#   ordered_port_connection                 :3
+#   unconnected_inst_output                 :4
+# 
+# -----------------------------------------------------------
+# Info (51)
+# -----------------------------------------------------------
+#   async_reset_active_high                 :1
+#   const_reg_data                          :8
+#   flop_without_control                    :30
+#   fsm_without_one_hot_encoding            :1
+#   module_output_not_registered            :1
+#   var_set_not_read                        :5
+#   always_signal_assign_large              :2
+#   multi_ports_in_single_line              :3
+# 
+# -----------------------------------------------------------
+# Resolved (0)
+# -----------------------------------------------------------
+# 
+# Generating Debug Information...
+# 
+# =================================================================
+# To view results in batch
+#   /var/lib/jenkins/workspace/test1/Lint_Results/lint.rpt
+# 
+# To view results in GUI 
+#   qverify /var/lib/jenkins/workspace/test1/Lint_Results/lint.db
+# =================================================================
+# 
+# End of log Wed Mar 26 12:48:02 2025
+# 
+# Command : lint generate report lint_out -html -show_code_snippet -lines_count_before_violation 7
+# See 'Lint_Results/html/lint_out.htm' for detailed  report.
+# 
+[test1] $ /bin/sh -xe /tmp/jenkins908798416384947144.sh
++ make cdc
+qverify -od CDC_result -c -do " \
+do qs_files/release.goal; \
+do qs_files/cdc_directives.tcl; \
+cdc run -d demo_top; \
+cdc generate report cdc_detail.rpt; \
+exit"
+# 
+# Questa OneSpin Static & Formal Verification System
+# Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+# 
+# This material contains trade secrets or otherwise
+# confidential information owned by
+# Siemens Industry Software Inc. or its affiliates
+# (collectively, "SISW"), or its licensors. Access
+# to and use of this information is strictly limited
+# as set forth in the customer's applicable
+# agreements with SISW.
+# 
+# Unpublished work. Copyright 2024 Siemens
+# 
+# Command : cdc run -d demo_top
+# 
+# Questa OneSpin Static & Formal Verification System
+# Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+# log created Wed Mar 26 12:48:03 2025 by jenkins on test
+# 
+# Executing Command : cdc run -d demo_top
+# File: /var/lib/jenkins/workspace/test1/CDC_result/qverify_cmds.tcl, Line: 34
+# Performance stats (CDC setup::started) : cpu : 0(1) sec  memory : 0(355) mb  elapsed : 0(0) sec
+# 
+### Starting Step: cdc setup ### 
+# 
+## CDC Setup Design...
+# Restoring module 'dpmem2clk'.
+# Restoring module 'generic_fifo_dc_gray'.
+# Restoring module 'crc_16_calc'.
+# Restoring module 'demo_top'.
+# Warning : Scheme name with (-)hyphen option in 'cdc scheme on/off' and 'cdc dmux -check off' will be deprecated in a future release.  Please use scheme name without (-)hyphen in 'cdc scheme on/off'.  [cdc-112]
+#         : File '/var/lib/jenkins/workspace/test1/qs_files/cdc_directives.tcl', Line '10'.
+# CDC setup skipped due to incremental cdc setup.
+# 
+# Questa OneSpin Static & Formal Verification System
+# Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+# log created Wed Mar 26 12:48:04 2025 by jenkins on test
+# 
+### Starting Step: cdc setup ###
+# Info    : Command analysis skipped due to incremental run.  Command 'cdc setup'.  [elaboration-845]
+#         : Restoring messages from last run.
+# 
+# Warning : Found internal reset signals.  [netlist-82]
+#         : Signals are not resets.
+# Info    : Reset detection done.  Identified '2' resets: '0' user-specified and '2' inferred resets.  [reset-4]
+# Info    : Clock processing done.  Identified '3' clocks; '3' user-specified and '0' inferred clocks.  [cdc-44]
+# Error   : Primary port connects to multiple clock domains.  Pin 'rst', Direction 'input'.  [hdl-41]
+#         : CDC crossing to and from primary port will be ignored, if argument '-multi_fanout_async' is not specified with 'cdc preference'.
+# Error   : Missing clock domain for reset port.  Port 'rst', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 29.  [hdl-289]
+#         : Review reset specification and assign clock domain.
+# Error   : Primary port connects to multiple clock domains.  Pin 'clr', Direction 'input'.  [hdl-41]
+#         : CDC crossing to and from primary port will be ignored, if argument '-multi_fanout_async' is not specified with 'cdc preference'.
+# Error   : Missing clock domain for reset port.  Port 'clr', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 29.  [hdl-289]
+#         : Review reset specification and assign clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'din', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 30.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'we', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 31.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'we_1', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 32.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'cpu_addr', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 35.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'cs', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 36.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'cpu_data', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 37.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'init_done_in', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 38.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'hdrin', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 33.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Error   : Missing port domain assignment for bits of port.  Port 'scan_clk', File '/var/lib/jenkins/workspace/test1/src/vlog/demo_top.v', Line 39.  [hdl-51]
+#         : Check and assign the appropriate clock domain.
+# Warning : Inferred reset present.  Review the reset tree and use 'netlist reset' to convert the inferred reset to user reset.  [hdl-238]
+# 
+# End of log Wed Mar 26 12:48:04 2025
+# 
+# Performance stats (CDC settings report generation::started) : cpu : 0(0) sec  memory : 0(466) mb  elapsed : 0(0) sec
+# Performance stats (CDC settings report generation::ended) : cpu : 0(0) sec  memory : 0(466) mb  elapsed : 0(0) sec
+# Summary: 13 Errors, 3 Warnings in cdc setup
+# Performance stats (CDC setup::ended) : cpu : 0(1) sec  memory : 466(821) mb  elapsed : 1(1) sec
+# Performance stats (CDC analysis::started) : cpu : 0(1) sec  memory : 0(355) mb  elapsed : 0(1) sec
+# 
+### Starting Step: cdc run ### 
+# 
+## Analyzing CDC Design...
+# CDC analysis skipped due to incremental cdc run.
+# 
+# Questa OneSpin Static & Formal Verification System
+# Version 2024.1 5753496 linux_x86_64 07-Feb-2024
+# log created Wed Mar 26 12:48:04 2025 by jenkins on test
+# 
+### Starting Step: cdc run ###
+# Info    : Command analysis skipped due to incremental run.  Command 'cdc run'.  [elaboration-845]
+#         : Restoring messages from last run.
+# 
+# Info    : Possible dead end CDC paths not reported.  [hdl-222]
+#         : CDC paths may exist that do not propagate to a sequential element or an output port of the design. Please refer to the CDC setup checks window to review the dead end registers.
+# 
+# End of log Wed Mar 26 12:48:04 2025
+# 
+# Performance stats (CDC settings report generation::started) : cpu : 0(0) sec  memory : 0(378) mb  elapsed : 0(0) sec
+# Performance stats (CDC settings report generation::ended) : cpu : 0(0) sec  memory : 0(378) mb  elapsed : 0(0) sec
+## Generating Argument Files...
+# Performance stats (CDC analysis::ended) : cpu : 0(1) sec  memory : 378(733) mb  elapsed : 1(2) sec
+# Performance stats (CDC status update::started) : cpu : 0(1) sec  memory : 0(355) mb  elapsed : 0(2) sec
+## Applying CDC Design Waivers...
+# 
+# CDC Results
+# =================================================================
+# 
+# -----------------------------------------------------------------
+# Total number of checks                                       (46)
+# -----------------------------------------------------------------
+# 
+# Violations (30)
+# -----------------------------------------------------------------
+# Combinational logic before synchronizer.                     (2)
+# Multiple-bit signal across clock domain boundary.            (1)
+# Single Source Reconvergence of synchronizers.                (26)
+# Reconvergence of multiple TX clock synchronizers.            (1)
+# 
+# Cautions (3)
+# -----------------------------------------------------------------
+# DMUX synchronization.                                        (2)
+# Reconvergence of bus bits and other synchronizers.           (1)
+# 
+# Evaluations (9)
+# -----------------------------------------------------------------
+# Single-bit signal synchronized by DFF synchronizer.          (3)
+# Multiple-bit signal synchronized by DFF synchronizer.        (4)
+# FIFO synchronization.                                        (2)
+# 
+# Resolved - Waived or Verified Status (0)
+# -----------------------------------------------------------------
+# <None>
+# 
+# Proven (4)
+# -----------------------------------------------------------------
+# Single-bit signal synchronized by DFF synchronizer.          (3)
+# Pulse Synchronization.                                       (1)
+# 
+# Filtered (0)
+# -----------------------------------------------------------------
+# <None>
+# 
+# 
+# Performance stats (CDC report generation::started) : cpu : 0(0) sec  memory : 0(378) mb  elapsed : 0(0) sec
+# Performance stats (CDC report generation::ended) : cpu : 0(0) sec  memory : 0(378) mb  elapsed : 0(0) sec
+# 
+# 
+# Message Summary
+# ---------------------------------------------------------------------------
+# Count  Type     Message ID         Summary
+# ---------------------------------------------------------------------------
+#     2  Error    hdl-289            Missing clock domain for reset port.
+#     2  Error    hdl-41             Primary port connects to multiple clock domains.
+#     9  Error    hdl-51             Missing port domain assignment for bits of port.
+#     1  Warning  cdc-112            Scheme name with (-)hyphen option in 'cdc scheme on/off' and 'cdc dmux -check off' will be deprecated in a future release.
+#     1  Warning  hdl-238            Inferred reset present.
+#     1  Warning  netlist-82         Found internal reset signals.
+#     1  Info     cdc-44             Clock processing done.
+#     2  Info     elaboration-845    Command analysis skipped due to incremental run.
+#     1  Info     hdl-222            Possible dead end CDC paths not reported.
+#     1  Info     reset-4            Reset detection done.
+# 
+# Summary: 13 Errors, 3 Warnings in processing "cdc run"
+# Final Process Statistics: Max memory 466MB, CPU time 0s, Total time 0s
+# Performance stats (CDC status update::ended) : cpu : 0(1) sec  memory : 378(733) mb  elapsed : 0(2) sec
+# 
+# End of log Wed Mar 26 12:48:05 2025
+# 
+# Command : cdc generate report cdc_detail.rpt
+# Reading design database from /var/lib/jenkins/workspace/test1/CDC_result/qcache/CDC/CACHE...completed (0 (s)).
+# Performance stats (CDC report generation::started) : cpu : 0(1) sec  memory : 0(357) mb  elapsed : 0(2) sec
+# Performance stats (CDC report generation::ended) : cpu : 0(1) sec  memory : 0(357) mb  elapsed : 0(2) sec
+# See 'CDC_result/cdc_detail.rpt' for detailed CDC report.
+Starting Questa Lint analysis...
+Lint report file: /var/lib/jenkins/workspace/test1/Lint_Results/lint.rpt
+CDC report file: /var/lib/jenkins/workspace/test1/CDC_result/cdc_detail.rpt
+Questa Lint analysis completed.
+Build step 'Questa Lint Analysis' changed build result to SUCCESS
+No GitLab connection configured
+Finished: SUCCESS

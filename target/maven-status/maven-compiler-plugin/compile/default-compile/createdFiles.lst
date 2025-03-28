@@ -1,0 +1,10 @@
+io\jenkins\plugins\questaformal\QuestaFormalResult$CheckItem.class
+io\jenkins\plugins\questaformal\QuestaFormalBuildStep.class
+io\jenkins\plugins\questaformal\QuestaFormalBuildStep$DescriptorImpl.class
+io\jenkins\plugins\questaformal\CheckItem.class
+io\jenkins\plugins\questaformal\QuestaFormalResult.class
+io\jenkins\plugins\questaformal\QuestaFormalResult$ViolationItem.class
+META-INF\annotations\hudson.Extension.txt
+io\jenkins\plugins\questaformal\ViolationItem.class
+io\jenkins\plugins\questaformal\QuestaFormalBuildStep.stapler
+META-INF\annotations\hudson.Extension

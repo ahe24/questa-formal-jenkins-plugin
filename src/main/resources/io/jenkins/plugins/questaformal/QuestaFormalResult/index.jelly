@@ -1,0 +1,300 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
+    <l:layout title="Questa Formal Results">
+        <l:main-panel>
+            <style>
+                .results-container { padding: 20px; }
+                .result-section { margin-bottom: 30px; }
+                .result-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                .result-table th, .result-table td { 
+                    padding: 8px; 
+                    text-align: left; 
+                    border: 1px solid #ddd; 
+                }
+                .result-table th { background-color: #f5f5f5; }
+                .details-section { 
+                    background-color: #f9f9f9;
+                    padding: 10px;
+                    margin-top: 5px;
+                    border: 1px solid #ddd;
+                    display: none;
+                }
+                .count-cell { font-weight: bold; text-align: right; }
+                .error-count { color: #d9534f; }
+                .warning-count { color: #f0ad4e; }
+                .info-count { color: #5bc0de; }
+                .detail-item { cursor: pointer; padding: 5px; border-bottom: 1px solid #eee; }
+                .detail-item:hover { background-color: #f5f5f5; }
+                .check-details { display: none; padding: 10px; background-color: #fff; border: 1px solid #ddd; margin: 5px 0; }
+                .category-title { font-weight: bold; color: #666; }
+                .check-count { color: #999; margin-left: 10px; }
+                .violation-details pre { white-space: pre-wrap; margin: 5px 0; }
+                .design-info {
+                    background: #fff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    margin-bottom: 20px;
+                }
+                .design-info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 2fr;
+                    gap: 20px;
+                }
+                .info-card {
+                    padding: 20px;
+                    background: #f8f9fa;
+                    border-radius: 6px;
+                }
+                .design-details {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                .design-row {
+                    display: flex;
+                    align-items: center;
+                }
+                .design-label {
+                    font-size: 0.9em;
+                    color: #666;
+                    width: 100px;
+                }
+                .design-value {
+                    font-size: 1.1em;
+                    font-weight: bold;
+                    color: #333;
+                }
+                .progress-container {
+                    position: relative;
+                    width: 100%;
+                    height: 120px;
+                    padding: 15px 30px;
+                }
+                .progress-bar {
+                    position: relative;
+                    width: 100%;
+                    height: 40px;
+                    margin: 35px 0;
+                    background: linear-gradient(to right, 
+                        #ff4444 0%, #ff4444 50%,
+                        #ffbb33 50%, #ffbb33 80%,
+                        #00C851 80%, #00C851 100%
+                    );
+                    border-radius: 20px;
+                }
+                .progress-value {
+                    position: absolute;
+                    padding: 4px 8px;
+                    background: #333;
+                    color: white;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    font-size: 16px;
+                    white-space: nowrap;
+                    transform: translate(-50%, -140%);
+                }
+                .progress-marker {
+                    position: absolute;
+                    width: 0;
+                    height: 0;
+                    bottom: -15px;
+                    transform: translateX(-50%);
+                    border-left: 10px solid transparent;
+                    border-right: 10px solid transparent;
+                    border-bottom: 15px solid #333;
+                }
+                .progress-score {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                }
+                .progress-labels {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    color: white;
+                    font-weight: bold;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                }
+                .label-poor {
+                    position: absolute;
+                    left: 25%;
+                    transform: translateX(-50%);
+                }
+                .label-normal {
+                    position: absolute;
+                    left: 65%;
+                    transform: translateX(-50%);
+                }
+                .label-good {
+                    position: absolute;
+                    left: 90%;
+                    transform: translateX(-50%);
+                }
+                .progress-range {
+                    position: absolute;
+                    width: 100%;
+                    bottom: -25px;
+                    display: flex;
+                    justify-content: space-between;
+                    color: #666;
+                    font-size: 12px;
+                }
+                .progress-scale {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 5px;
+                    color: #666;
+                    font-size: 12px;
+                }
+                .progress-value {
+                    text-align: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                .progress-label {
+                    text-align: center;
+                    font-size: 14px;
+                    color: #666;
+                    margin-top: 5px;
+                }
+            </style>
+
+            <div class="results-container">
+                <h1>Questa Formal Analysis Results</h1>
+
+                <div class="design-info">
+                    <div class="design-info-grid">
+                        <div class="info-card">
+                            <div class="design-details">
+                                <div class="design-row">
+                                    <span class="design-label">Design:</span>
+                                    <span class="design-value">${it.getLintDesign()}</span>
+                                </div>
+                                <div class="design-row">
+                                    <span class="design-label">Timestamp:</span>
+                                    <span class="design-value">${it.getLintTimestamp()}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-labels">
+                                        <span class="label-poor">Poor</span>
+                                        <span class="label-normal">Normal</span>
+                                        <span class="label-good">Good</span>
+                                    </div>
+                                    <div class="progress-score">
+                                        <div class="progress-value" style="left: ${it.getQualityScorePercentage()}%">
+                                            ${it.getQualityScore()}
+                                        </div>
+                                        <div class="progress-marker" style="left: ${it.getQualityScorePercentage()}%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="progress-label">Quality Score</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h2>Summary</h2>
+                    <table class="result-table">
+                        <tr>
+                            <th>Category</th>
+                            <th>Count</th>
+                        </tr>
+                        <tr>
+                            <td>Errors</td>
+                            <td class="count-cell error-count">${it.getErrorCount()}</td>
+                        </tr>
+                        <tr>
+                            <td>Warnings</td>
+                            <td class="count-cell warning-count">${it.getWarningCount()}</td>
+                        </tr>
+                        <tr>
+                            <td>Info</td>
+                            <td class="count-cell info-count">${it.getInfoCount()}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="result-section">
+                    <h2>Lint Results</h2>
+                    <table class="result-table">
+                        <tr>
+                            <th>Category</th>
+                            <th>Count</th>
+                            <th>Actions</th>
+                        </tr>
+                        <tr>
+                            <td>Errors</td>
+                            <td class="count-cell error-count">${it.lintResults.get("errors")}</td>
+                            <td><a href="#" onclick="showDetails('lint-errors')">View Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>Warnings</td>
+                            <td class="count-cell warning-count">${it.lintResults.get("warnings")}</td>
+                            <td><a href="#" onclick="showDetails('lint-warnings')">View Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>Info</td>
+                            <td class="count-cell info-count">${it.lintResults.get("info")}</td>
+                            <td><a href="#" onclick="showDetails('lint-info')">View Details</a></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="result-section">
+                    <h2>Details</h2>
+                    <div class="details-section">
+                        <div class="detail-item" onclick="toggleDetails(this)">
+                            <span class="category-title">Errors</span>
+                            <span class="check-count">(${it.getErrorCount()})</span>
+                        </div>
+                        <div class="check-details">
+                            <div class="violation-details">
+                                <pre>${it.getErrorDetails()}</pre>
+                            </div>
+                        </div>
+                        <div class="detail-item" onclick="toggleDetails(this)">
+                            <span class="category-title">Warnings</span>
+                            <span class="check-count">(${it.getWarningCount()})</span>
+                        </div>
+                        <div class="check-details">
+                            <div class="violation-details">
+                                <pre>${it.getWarningDetails()}</pre>
+                            </div>
+                        </div>
+                        <div class="detail-item" onclick="toggleDetails(this)">
+                            <span class="category-title">Info</span>
+                            <span class="check-count">(${it.getInfoCount()})</span>
+                        </div>
+                        <div class="check-details">
+                            <div class="violation-details">
+                                <pre>${it.getInfoDetails()}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function toggleDetails(element) {
+                    var details = element.nextElementSibling;
+                    if (details.style.display === "none" || details.style.display === "") {
+                        details.style.display = "block";
+                    } else {
+                        details.style.display = "none";
+                    }
+                }
+            </script>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

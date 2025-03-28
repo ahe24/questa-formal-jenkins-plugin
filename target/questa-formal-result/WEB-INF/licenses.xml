@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<l:dependencies xmlns:l='licenses' groupId='io.jenkins.plugins' artifactId='questa-formal-result' version='1.0-SNAPSHOT'><l:dependency name='Questa Formal Result Plugin' groupId='io.jenkins.plugins' artifactId='questa-formal-result' version='1.0-SNAPSHOT' url=''><l:description>Jenkins plugin for visualizing Questa Formal verification results</l:description></l:dependency></l:dependencies>
