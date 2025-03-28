@@ -45,3 +45,6 @@ Thumbs.db
 
 # Dependency
 lib/
+
+# screenshot
+screenshot*
