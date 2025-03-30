@@ -55,17 +55,60 @@ public class QuestaFormalBuildStep extends Recorder {
                 FilePath lintFile = workspace.child(getLintReportPath());
                 FilePath cdcFile = workspace.child(getCdcReportPath());
                 
-                if (!lintFile.exists()) {
-                    listener.error("Lint report file not found: " + getLintReportPath());
+                listener.getLogger().println("\n=== Questa Formal Analysis Debug Log ===");
+                listener.getLogger().println("Workspace: " + workspace.getRemote());
+                listener.getLogger().println("Looking for lint report at: " + lintFile.getRemote());
+                
+                if (lintFile.exists()) {
+                    // 파일 전체 내용 읽기
+                    String content = lintFile.readToString();
+                    listener.getLogger().println("\n=== Lint Report Content ===");
+                    
+                    // Check Summary 섹션 찾기
+                    int summaryStart = content.indexOf("Section 1 : Check Summary");
+                    int summaryEnd = content.indexOf("Section 2");
+                    
+                    if (summaryStart != -1 && summaryEnd != -1) {
+                        String summarySection = content.substring(summaryStart, summaryEnd);
+                        listener.getLogger().println("\n=== Check Summary Section ===");
+                        listener.getLogger().println(summarySection);
+                        
+                        // Create result object with detailed logging
+                        listener.getLogger().println("\n=== Parsing Results ===");
+                        QuestaFormalResult result = new QuestaFormalResult(
+                            new File(lintFile.getRemote()),
+                            cdcFile.exists() ? new File(cdcFile.getRemote()) : null,
+                            listener
+                        );
+                        
+                        // Log detailed summary
+                        listener.getLogger().println("\n=== Parsed Summary ===");
+                        listener.getLogger().println("Error count: " + result.getErrorCount());
+                        listener.getLogger().println("Warning count: " + result.getWarningCount());
+                        listener.getLogger().println("Info count: " + result.getInfoCount());
+                        
+                        // Log individual items
+                        listener.getLogger().println("\n=== Detailed Items ===");
+                        for (QuestaFormalResult.LintSummaryItem item : result.getLintSummary()) {
+                            listener.getLogger().println(String.format("%s - %s: %d", 
+                                item.getCategory(), item.getName(), item.getCount()));
+                        }
+                        
+                        build.addAction(result);
+                        listener.getLogger().println("\n=== Processing Complete ===");
+                        return true;
+                    } else {
+                        listener.error("Could not find Check Summary section in lint report");
+                        return false;
+                    }
+                } else {
+                    listener.error("Lint report file not found at: " + getLintReportPath());
+                    listener.error("Current directory contents:");
+                    for (FilePath child : workspace.list()) {
+                        listener.error("  " + child.getName());
+                    }
                     return false;
                 }
-                
-                QuestaFormalResult result = new QuestaFormalResult(
-                    new File(lintFile.getRemote()),
-                    cdcFile.exists() ? new File(cdcFile.getRemote()) : null
-                );
-                build.addAction(result);
-                return true;
             }
             listener.error("Workspace is null");
             return false;

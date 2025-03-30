@@ -1,6 +1,7 @@
 package io.jenkins.plugins.questaformal;
 
 import hudson.model.Action;
+import hudson.model.BuildListener;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -11,10 +12,12 @@ public class QuestaFormalResult implements Action {
     private final Map<String, Integer> cdcResults;
     private final File lintReportFile;
     private final File cdcReportFile;
+    private final BuildListener listener; // Add this field
 
-    public QuestaFormalResult(File lintFile, File cdcFile) {
+    public QuestaFormalResult(File lintFile, File cdcFile, BuildListener listener) {
         this.lintReportFile = lintFile;
         this.cdcReportFile = cdcFile;
+        this.listener = listener;
         this.lintResults = lintFile != null ? parseLintReport(lintFile) : createEmptyLintResults();
         this.cdcResults = cdcFile != null ? parseCDCReport(cdcFile) : createEmptyCDCResults();
     }
@@ -82,20 +85,50 @@ public class QuestaFormalResult implements Action {
 
     public String getDetails(String type) {
         try {
+            if (lintReportFile == null) return "No details available";
+            String content = new String(java.nio.file.Files.readAllBytes(lintReportFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+            // 우선 Section 2 : Check Details 영역을 추출
+            int sec2Start = content.indexOf("Section 2 : Check Details");
+            if (sec2Start == -1) return "Check Details section not found";
+            int sec3Start = content.indexOf("Section 3", sec2Start);
+            if (sec3Start == -1) sec3Start = content.length();
+            String detailsSection = content.substring(sec2Start, sec3Start);
+            
+            // 어떤 카테고리인지 결정
+            String marker;
             switch (type) {
                 case "lint-errors":
-                    return extractSection(lintReportFile, "Error (", "Warning (");
+                    marker = "Error (";
+                    break;
                 case "lint-warnings":
-                    return extractSection(lintReportFile, "Warning (", "Info (");
+                    marker = "Warning (";
+                    break;
                 case "lint-info":
-                    return extractSection(lintReportFile, "Info (", "Resolved (");
-                case "cdc-violations":
-                    return extractSection(cdcReportFile, "Violations (", "Cautions (");
-                case "cdc-cautions":
-                    return extractSection(cdcReportFile, "Cautions (", "Evaluations (");
+                    marker = "Info (";
+                    break;
                 default:
                     return "No details available";
             }
+            
+            // 세부 Details 추출: marker가 나타난 이후부터, 구분선(-------)까지 수집
+            StringBuilder result = new StringBuilder();
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.StringReader(detailsSection));
+            String line;
+            boolean capture = false;
+            while ((line = reader.readLine()) != null) {
+                // marker가 나오면 캡처 시작
+                if (line.contains(marker)) {
+                    capture = true;
+                }
+                if (capture) {
+                    result.append(line).append("\n");
+                    // 구분선이 나면 캡처 종료 (단, 현재 카테고리 구분선)
+                    if (line.trim().matches("[-]+")) {
+                        capture = false;
+                    }
+                }
+            }
+            return result.toString();
         } catch (IOException e) {
             return "Error reading details: " + e.getMessage();
         }
@@ -352,5 +385,91 @@ public class QuestaFormalResult implements Action {
             this.details = details;
             this.id = type.toLowerCase().replaceAll("\\s+", "-");
         }
+    }
+
+    public static class LintSummaryItem {
+        private final String category;
+        private final String name;
+        private final int count;
+
+        public LintSummaryItem(String category, String name, int count) {
+            this.category = category;
+            this.name = name;
+            this.count = count;
+        }
+
+        public String getCategory() { return category; }
+        public String getName() { return name; }
+        public int getCount() { return count; }
+    }
+
+    public List<LintSummaryItem> getLintSummary() {
+        List<LintSummaryItem> summary = new ArrayList<>();
+        if (listener != null) {
+            listener.getLogger().println("Reading lint report from: " + lintReportFile.getAbsolutePath());
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(lintReportFile))) {
+            String line;
+            String currentCategory = null;
+            boolean inSummarySection = false;
+            while ((line = reader.readLine()) != null) {
+                // Skip separator lines (e.g. "-----" or "=====")
+                if (line.trim().matches("[-=]+")) continue;
+                if (line.contains("Section 1 : Check Summary")) {
+                    inSummarySection = true;
+                    if (listener != null) {
+                        listener.getLogger().println("Found Section 1");
+                    }
+                    continue;
+                }
+                if (!inSummarySection) continue;
+                if (line.contains("Section 2")) {
+                    if (listener != null) {
+                        listener.getLogger().println("End of Section 1");
+                    }
+                    break;
+                }
+                // Category header, e.g. "| Error (7) |"
+                if (line.trim().startsWith("| ") && line.contains(" (")) {
+                    currentCategory = line.split("\\(")[0].replace("|", "").trim();
+                    if (listener != null) {
+                        listener.getLogger().println("Found category: " + currentCategory);
+                    }
+                    continue;
+                }
+                // Parse item lines like "  assign_width_underflow : 6"
+                if (currentCategory != null && !line.startsWith("|") && line.contains(":")) {
+                    String[] parts = line.trim().split("\\s*:\\s*");
+                    if (parts.length == 2) {
+                        try {
+                            String name = parts[0].trim();
+                            int count = Integer.parseInt(parts[1].trim());
+                            summary.add(new LintSummaryItem(currentCategory, name, count));
+                            if (listener != null) {
+                                listener.getLogger().println(
+                                    String.format("Added item: %s - %s: %d", currentCategory, name, count));
+                            }
+                        } catch (NumberFormatException e) {
+                            if (listener != null) {
+                                listener.getLogger().println("Failed to parse count in line: " + line);
+                            }
+                        }
+                    }
+                }
+            }
+            if (listener != null) {
+                listener.getLogger().println("Total items parsed: " + summary.size());
+                for (LintSummaryItem item : summary) {
+                    listener.getLogger().println(
+                        String.format("%s: %s (%d)", item.getCategory(), item.getName(), item.getCount()));
+                }
+            }
+        } catch (IOException e) {
+            if (listener != null) {
+                listener.getLogger().println("Error reading lint report: " + e.getMessage());
+                e.printStackTrace(listener.getLogger());
+            }
+        }
+        return summary;
     }
 }

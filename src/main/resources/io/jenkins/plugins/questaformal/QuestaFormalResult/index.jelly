@@ -162,6 +162,64 @@
                     color: #666;
                     margin-top: 5px;
                 }
+                .result-content-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                    margin-top: 20px;
+                }
+                .chart-card, .table-card {
+                    background: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 6px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+                .chart-card {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .lint-summary {
+                    margin-top: 20px;
+                }
+                .lint-category {
+                    margin-bottom: 20px;
+                }
+                .category-header {
+                    font-weight: bold;
+                    padding: 8px;
+                    border-radius: 4px;
+                    margin-bottom: 8px;
+                }
+                .error-header {
+                    background-color: #ffebee;
+                    color: #d32f2f;
+                }
+                .warning-header {
+                    background-color: #fff3e0;
+                    color: #ef6c00;
+                }
+                .info-header {
+                    background-color: #e3f2fd;
+                    color: #1976d2;
+                }
+                .category-item {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 4px 12px;
+                    border-bottom: 1px solid #eee;
+                }
+                .item-name {
+                    color: #666;
+                }
+                .item-count {
+                    font-weight: bold;
+                    min-width: 40px;
+                    text-align: right;
+                }
+                .error-count { color: #d9534f; }
+                .warning-count { color: #f0ad4e; }
+                .info-count { color: #5bc0de; }
             </style>
 
             <div class="results-container">
@@ -204,88 +262,96 @@
                 </div>
 
                 <div class="result-section">
-                    <h2>Summary</h2>
-                    <table class="result-table">
-                        <tr>
-                            <th>Category</th>
-                            <th>Count</th>
-                        </tr>
-                        <tr>
-                            <td>Errors</td>
-                            <td class="count-cell error-count">${it.getErrorCount()}</td>
-                        </tr>
-                        <tr>
-                            <td>Warnings</td>
-                            <td class="count-cell warning-count">${it.getWarningCount()}</td>
-                        </tr>
-                        <tr>
-                            <td>Info</td>
-                            <td class="count-cell info-count">${it.getInfoCount()}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="result-section">
                     <h2>Lint Results</h2>
-                    <table class="result-table">
-                        <tr>
-                            <th>Category</th>
-                            <th>Count</th>
-                            <th>Actions</th>
-                        </tr>
-                        <tr>
-                            <td>Errors</td>
-                            <td class="count-cell error-count">${it.lintResults.get("errors")}</td>
-                            <td><a href="#" onclick="showDetails('lint-errors')">View Details</a></td>
-                        </tr>
-                        <tr>
-                            <td>Warnings</td>
-                            <td class="count-cell warning-count">${it.lintResults.get("warnings")}</td>
-                            <td><a href="#" onclick="showDetails('lint-warnings')">View Details</a></td>
-                        </tr>
-                        <tr>
-                            <td>Info</td>
-                            <td class="count-cell info-count">${it.lintResults.get("info")}</td>
-                            <td><a href="#" onclick="showDetails('lint-info')">View Details</a></td>
-                        </tr>
-                    </table>
+                    <div class="result-content-grid">
+                        <div class="chart-card">
+                            <canvas id="lintResultsChart" width="300" height="200"></canvas>
+                        </div>
+                        <div class="table-card">
+                            <table class="result-table">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Count</th>
+                                </tr>
+                                <tr>
+                                    <td>Errors</td>
+                                    <td class="count-cell error-count">${it.lintResults.get("errors")}</td>
+                                </tr>
+                                <tr>
+                                    <td>Warnings</td>
+                                    <td class="count-cell warning-count">${it.lintResults.get("warnings")}</td>
+                                </tr>
+                                <tr>
+                                    <td>Info</td>
+                                    <td class="count-cell info-count">${it.lintResults.get("info")}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="result-section">
                     <h2>Details</h2>
-                    <div class="details-section">
-                        <div class="detail-item" onclick="toggleDetails(this)">
-                            <span class="category-title">Errors</span>
-                            <span class="check-count">(${it.getErrorCount()})</span>
-                        </div>
-                        <div class="check-details">
-                            <div class="violation-details">
-                                <pre>${it.getErrorDetails()}</pre>
+                    <div class="lint-summary">
+                        <j:set var="lastCategory" value=""/>
+                        <j:forEach var="item" items="${it.getLintSummary()}" varStatus="status">
+                            <j:set var="category" value="${item.getCategory()}"/>
+                            <j:if test="${status.first || lastCategory != category}">
+                                <div class="category-header ${category.toLowerCase()}-header">
+                                    <span>${category}</span>
+                                </div>
+                                <j:set var="lastCategory" value="${category}"/>
+                            </j:if>
+                            <div class="category-item">
+                                <span class="item-name">${item.getName()}</span>
+                                <span class="item-count ${category.toLowerCase()}-count">${item.getCount()}</span>
                             </div>
-                        </div>
-                        <div class="detail-item" onclick="toggleDetails(this)">
-                            <span class="category-title">Warnings</span>
-                            <span class="check-count">(${it.getWarningCount()})</span>
-                        </div>
-                        <div class="check-details">
-                            <div class="violation-details">
-                                <pre>${it.getWarningDetails()}</pre>
-                            </div>
-                        </div>
-                        <div class="detail-item" onclick="toggleDetails(this)">
-                            <span class="category-title">Info</span>
-                            <span class="check-count">(${it.getInfoCount()})</span>
-                        </div>
-                        <div class="check-details">
-                            <div class="violation-details">
-                                <pre>${it.getInfoDetails()}</pre>
-                            </div>
-                        </div>
+                        </j:forEach>
                     </div>
                 </div>
             </div>
 
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
+                const ctx = document.getElementById('lintResultsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Errors', 'Warnings', 'Info'],
+                        datasets: [{
+                            data: [
+                                ${it.lintResults.get("errors")},
+                                ${it.lintResults.get("warnings")},
+                                ${it.lintResults.get("info")}
+                            ],
+                            backgroundColor: [
+                                '#d9534f',  // Error color
+                                '#f0ad4e',  // Warning color
+                                '#5bc0de'   // Info color
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',  // This makes the bars horizontal
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+
                 function toggleDetails(element) {
                     var details = element.nextElementSibling;
                     if (details.style.display === "none" || details.style.display === "") {
