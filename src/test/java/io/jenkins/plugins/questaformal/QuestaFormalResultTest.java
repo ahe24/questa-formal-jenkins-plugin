@@ -32,58 +32,35 @@ public class QuestaFormalResultTest {
     }
 
     @Test
-    public void testGetLintSummary() {
-        QuestaFormalResult result = new QuestaFormalResult(testLintFile, null, listener);
-        List<QuestaFormalResult.LintSummaryItem> summary = result.getLintSummary();
-
-        // 파일 파싱 내용 출력
-        System.out.println("\n=== Lint Summary Test Results ===");
-        System.out.println("File path: " + testLintFile.getAbsolutePath());
-        System.out.println("Summary items count: " + summary.size());
+    public void testLintResults() {
+        String testLintPath = testLintFile.getAbsolutePath();
+        QuestaFormalResult result = new QuestaFormalResult(testLintPath, null, listener);
         
-        // 각 항목 출력
-        for (QuestaFormalResult.LintSummaryItem item : summary) {
-            System.out.println(String.format("%s - %s: %d", 
-                item.getCategory(), item.getName(), item.getCount()));
-        }
-
-        // 로그 출력 확인
-        Mockito.verify(logger).println(Mockito.contains("Reading lint report from:"));
+        // 기본 정보 검증
+        assertNotNull("Design name should not be null", result.getLintDesign());
+        assertNotNull("Timestamp should not be null", result.getLintTimestamp());
+        assertTrue("Quality score should be >= 0", result.getQualityScore() >= 0);
         
-        // 상세 결과 검증
-        assertNotNull("Summary should not be null", summary);
-        assertFalse("Summary should not be empty", summary.isEmpty());
-        System.out.println("\nExpected items count by category:");
+        // 카운트 검증
+        assertEquals("Should have 7 errors", 7, result.getLintErrorCount());
+        assertEquals("Should have 12 warnings", 12, result.getLintWarningCount());
+        assertEquals("Should have 51 info items", 51, result.getLintInfoCount());
         
-        // 카테고리별 항목 수 검증
-        int errorCount = 0, warningCount = 0, infoCount = 0;
-        for (QuestaFormalResult.LintSummaryItem item : summary) {
-            switch (item.getCategory().trim()) {
-                case "Error": errorCount++; break;
-                case "Warning": warningCount++; break;
-                case "Info": infoCount++; break;
-            }
-        }
+        // Check Details 검증
+        List<QuestaFormalResult.CheckItem> checks = result.getAllLintChecks();
+        assertNotNull("Check list should not be null", checks);
+        assertFalse("Check list should not be empty", checks.isEmpty());
         
-        System.out.println("Error items: " + errorCount);
-        System.out.println("Warning items: " + warningCount);
-        System.out.println("Info items: " + infoCount);
-        
-        // 구체적인 항목 검증
-        assertEquals("Should have 2 error items", 2, errorCount);
-        assertEquals("Should have 2 warning items", 2, warningCount);
-        assertEquals("Should have 2 info items", 2, infoCount);
-        
-        // 특정 항목 검증
-        boolean foundError = false;
-        for (QuestaFormalResult.LintSummaryItem item : summary) {
-            if ("Error".equals(item.getCategory()) && 
-                "assign_width_underflow".equals(item.getName()) && 
-                item.getCount() == 6) {
-                foundError = true;
+        // 특정 Check 항목 검증
+        boolean foundCheck = false;
+        for (QuestaFormalResult.CheckItem check : checks) {
+            if (check.getName().contains("assign_width_underflow")) {
+                foundCheck = true;
+                assertEquals("Check count should match", 6, check.getCount());
+                assertNotNull("Check details should not be null", check.getDetails());
                 break;
             }
         }
-        assertTrue("Should find assign_width_underflow error with count 6", foundError);
+        assertTrue("Should find assign_width_underflow check", foundCheck);
     }
 }

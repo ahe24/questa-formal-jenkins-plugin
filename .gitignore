@@ -48,3 +48,6 @@ lib/
 
 # screenshot
 screenshot*
+
+# jenkins log
+jenkins_log.txt

@@ -3,9 +3,9 @@ io\jenkins\plugins\questaformal\QuestaFormalBuildStep.class
 io\jenkins\plugins\questaformal\QuestaFormalBuildStep$DescriptorImpl.class
 io\jenkins\plugins\questaformal\CheckItem.class
 io\jenkins\plugins\questaformal\QuestaFormalResult.class
-io\jenkins\plugins\questaformal\QuestaFormalResult$ViolationItem.class
+io\jenkins\plugins\questaformal\QuestaFormalBuildStep\DescriptorImpl\doCheckCdcReportPath.stapler
 META-INF\annotations\hudson.Extension.txt
-io\jenkins\plugins\questaformal\QuestaFormalResult$LintSummaryItem.class
 io\jenkins\plugins\questaformal\ViolationItem.class
+io\jenkins\plugins\questaformal\QuestaFormalBuildStep\DescriptorImpl\doCheckLintReportPath.stapler
 io\jenkins\plugins\questaformal\QuestaFormalBuildStep.stapler
 META-INF\annotations\hudson.Extension

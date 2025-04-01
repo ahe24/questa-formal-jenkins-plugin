@@ -3,169 +3,407 @@ package io.jenkins.plugins.questaformal;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QuestaFormalResult implements Action {
-    private final Map<String, Integer> lintResults;
-    private final Map<String, Integer> cdcResults;
-    private final File lintReportFile;
-    private final File cdcReportFile;
-    private final BuildListener listener; // Add this field
+    private final String lintReportPath;
+    private final String cdcReportPath;
+    private final BuildListener listener;
+    private List<CheckItem> lintChecks = new ArrayList<>();
+    private String lintDesign = "";
+    private String lintTimestamp = "";
+    private double qualityScore = 0.0;
+    private int lintErrorCount = 0;
+    private int lintWarningCount = 0;
+    private int lintInfoCount = 0;
+    private boolean debugMode = false;  // 디버그 모드 플래그 추가
 
-    public QuestaFormalResult(File lintFile, File cdcFile, BuildListener listener) {
-        this.lintReportFile = lintFile;
-        this.cdcReportFile = cdcFile;
+    public QuestaFormalResult(String lintReportPath, String cdcReportPath, BuildListener listener) {
+        this.lintReportPath = lintReportPath;
+        this.cdcReportPath = cdcReportPath;
         this.listener = listener;
-        this.lintResults = lintFile != null ? parseLintReport(lintFile) : createEmptyLintResults();
-        this.cdcResults = cdcFile != null ? parseCDCReport(cdcFile) : createEmptyCDCResults();
+        parseLintReport();
     }
 
-    private Map<String, Integer> createEmptyLintResults() {
-        Map<String, Integer> results = new HashMap<>();
-        results.put("errors", 0);
-        results.put("warnings", 0);
-        results.put("info", 0);
-        return results;
-    }
-
-    private Map<String, Integer> createEmptyCDCResults() {
-        Map<String, Integer> results = new HashMap<>();
-        results.put("violations", 0);
-        results.put("cautions", 0);
-        return results;
-    }
-
-    private Map<String, Integer> parseLintReport(File lintFile) {
-        Map<String, Integer> results = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(lintFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("| Error (")) {
-                    results.put("errors", extractNumber(line));
-                } else if (line.contains("| Warning (")) {
-                    results.put("warnings", extractNumber(line));
-                } else if (line.contains("| Info (")) {
-                    results.put("info", extractNumber(line));
-                }
+    private void parseLintReport() {
+        if (lintReportPath == null) {
+            if (debugMode && listener != null) {
+                listener.error("Lint report path is null");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return createEmptyLintResults();
+            return;
         }
-        return results;
-    }
 
-    private Map<String, Integer> parseCDCReport(File cdcFile) {
-        Map<String, Integer> results = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(cdcFile))) {
+        if (debugMode && listener != null) {
+            listener.getLogger().println("\n=== Starting Lint Report Parsing ===");
+            listener.getLogger().println("Report path: " + lintReportPath);
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(lintReportPath), StandardCharsets.UTF_8))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("Violations (")) {
-                    results.put("violations", extractNumber(line));
-                } else if (line.contains("Cautions (")) {
-                    results.put("cautions", extractNumber(line));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return createEmptyCDCResults();
-        }
-        return results;
-    }
-
-    private int extractNumber(String line) {
-        try {
-            return Integer.parseInt(line.replaceAll(".*\\((\\d+)\\).*", "$1"));
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    public String getDetails(String type) {
-        try {
-            if (lintReportFile == null) return "No details available";
-            String content = new String(java.nio.file.Files.readAllBytes(lintReportFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
-            // 우선 Section 2 : Check Details 영역을 추출
-            int sec2Start = content.indexOf("Section 2 : Check Details");
-            if (sec2Start == -1) return "Check Details section not found";
-            int sec3Start = content.indexOf("Section 3", sec2Start);
-            if (sec3Start == -1) sec3Start = content.length();
-            String detailsSection = content.substring(sec2Start, sec3Start);
+            boolean isSummarySection = false;
+            boolean isDetailsSection = false;
+            String currentCategory = "";
             
-            // 어떤 카테고리인지 결정
-            String marker;
-            switch (type) {
-                case "lint-errors":
-                    marker = "Error (";
-                    break;
-                case "lint-warnings":
-                    marker = "Warning (";
-                    break;
-                case "lint-info":
-                    marker = "Info (";
-                    break;
-                default:
-                    return "No details available";
-            }
-            
-            // 세부 Details 추출: marker가 나타난 이후부터, 구분선(-------)까지 수집
-            StringBuilder result = new StringBuilder();
-            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.StringReader(detailsSection));
-            String line;
-            boolean capture = false;
             while ((line = reader.readLine()) != null) {
-                // marker가 나오면 캡처 시작
-                if (line.contains(marker)) {
-                    capture = true;
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                // Parse header information
+                if (line.startsWith("Design") && !line.contains("Quality Score")) {
+                    String[] parts = line.split(":", 2);
+                    if (parts.length > 1) {
+                        lintDesign = parts[1].trim();
+                        if (debugMode && listener != null) {
+                            listener.getLogger().println("[Header] Found Design: " + lintDesign);
+                        }
+                    }
                 }
-                if (capture) {
-                    result.append(line).append("\n");
-                    // 구분선이 나면 캡처 종료 (단, 현재 카테고리 구분선)
-                    if (line.trim().matches("[-]+")) {
-                        capture = false;
+                else if (line.startsWith("Timestamp")) {
+                    String[] parts = line.split(":", 2);
+                    if (parts.length > 1) {
+                        lintTimestamp = parts[1].trim();
+                        if (debugMode && listener != null) {
+                            listener.getLogger().println("Found Timestamp: " + lintTimestamp);
+                        }
+                    }
+                }
+                else if (line.startsWith("Design Quality Score")) {
+                    String[] parts = line.split(":", 2);
+                    if (parts.length > 1) {
+                        String scoreStr = parts[1].trim().replace("%", "");
+                        try {
+                            qualityScore = Double.parseDouble(scoreStr);
+                            if (debugMode && listener != null) {
+                                listener.getLogger().println("Found Quality Score: " + qualityScore);
+                            }
+                        } catch (NumberFormatException e) {
+                            qualityScore = 0.0;
+                            if (debugMode && listener != null) {
+                                listener.getLogger().println("Failed to parse Quality Score, defaulting to 0.0");
+                            }
+                        }
+                    }
+                }
+                
+                // Parse sections
+                if (line.contains("Section 1 : Check Summary")) {
+                    isSummarySection = true;
+                    isDetailsSection = false;
+                    if (debugMode && listener != null) {
+                        listener.getLogger().println("\n=== Entering Summary Section ===");
+                    }
+                    continue;
+                }
+                else if (line.contains("Section 2 : Check Details")) {
+                    isSummarySection = false;
+                    isDetailsSection = true;
+                    if (debugMode && listener != null) {
+                        listener.getLogger().println("\n=== Entering Details Section ===");
+                    }
+                    continue;
+                }
+                
+                // Parse summary section
+                if (isSummarySection) {
+                    // Parse category headers
+                    if (line.startsWith("| Error")) {
+                        Matcher m = Pattern.compile("Error\\s*\\((\\d+)\\)").matcher(line);
+                        if (m.find()) {
+                            lintErrorCount = Integer.parseInt(m.group(1));
+                            currentCategory = "Error";
+                            if (debugMode && listener != null) {
+                                listener.getLogger().println("[Summary] Found Error category with count: " + lintErrorCount);
+                            }
+                        }
+                        continue;
+                    }
+                    else if (line.startsWith("| Warning")) {
+                        Matcher m = Pattern.compile("Warning\\s*\\((\\d+)\\)").matcher(line);
+                        if (m.find()) {
+                            lintWarningCount = Integer.parseInt(m.group(1));
+                            currentCategory = "Warning";
+                            if (debugMode && listener != null) {
+                                listener.getLogger().println("Found Warning count: " + lintWarningCount);
+                            }
+                        }
+                        continue;
+                    }
+                    else if (line.startsWith("| Info")) {
+                        Matcher m = Pattern.compile("Info\\s*\\((\\d+)\\)").matcher(line);
+                        if (m.find()) {
+                            lintInfoCount = Integer.parseInt(m.group(1));
+                            currentCategory = "Info";
+                            if (debugMode && listener != null) {
+                                listener.getLogger().println("Found Info count: " + lintInfoCount);
+                            }
+                        }
+                        continue;
+                    }
+                    else if (line.startsWith("| Resolved")) {
+                        currentCategory = "Resolved";
+                        continue;
+                    }
+                    
+                    // Skip separator lines
+                    if (line.startsWith("-") || line.startsWith("=")) {
+                        continue;
+                    }
+                    
+                    // Parse check items in summary
+                    if (!line.startsWith("|") && line.contains(":")) {
+                        String[] parts = line.trim().split("\\s*:\\s*");
+                        if (parts.length == 2) {
+                            String checkName = parts[0].trim();
+                            try {
+                                int checkCount = Integer.parseInt(parts[1].trim());
+                                CheckItem newItem = new CheckItem(checkName, checkCount, "", currentCategory);
+                                lintChecks.add(newItem);
+                                
+                                if (debugMode && listener != null) {
+                                    listener.getLogger().println(String.format("[Summary] Added check item: %s (count: %d, category: %s, id: %s)",
+                                        checkName, checkCount, currentCategory, newItem.getId()));
+                                }
+                            } catch (NumberFormatException e) {
+                                if (debugMode && listener != null) {
+                                    listener.getLogger().println("[Error] Failed to parse check count for: " + checkName);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Parse details section
+                else if (isDetailsSection) {
+                    if (line.startsWith("| Error") || line.startsWith("| Warning") || 
+                        line.startsWith("| Info") || line.startsWith("| Resolved")) {
+                        currentCategory = line.substring(2, line.indexOf(" (")).trim();
+                        continue;
+                    }
+                    
+                    if (line.startsWith("Check:")) {
+                        if (debugMode && listener != null) {
+                            listener.getLogger().println("\n[Details] Processing check: " + line);
+                        }
+                        
+                        StringBuilder detailsBuilder = new StringBuilder();
+                        String checkName = "";
+                        String category = "";
+                        
+                        Matcher checkMatcher = Pattern.compile("Check:\\s*([^\\[]+)\\[Category:\\s*([^\\]]+)\\]\\s*\\((\\d+)\\)").matcher(line);
+                        if (checkMatcher.find()) {
+                            checkName = checkMatcher.group(1).trim();
+                            category = checkMatcher.group(2).trim();
+                            
+                            // Read message line
+                            String messageLine = reader.readLine();
+                            if (messageLine != null && messageLine.trim().startsWith("[Message:")) {
+                                String message = messageLine.trim();
+                                message = message.substring(message.indexOf(":") + 1).trim();
+                                if (message.endsWith("]")) {
+                                    message = message.substring(0, message.length() - 1).trim();
+                                }
+                                
+                                detailsBuilder.append(message).append("\n");
+                                
+                                if (debugMode && listener != null) {
+                                    listener.getLogger().println("[Details] Found message: " + message);
+                                }
+                                
+                                // Skip separator line
+                                reader.readLine();
+                                
+                                // Read occurrences
+                                String instanceLine;
+                                String lastSpecificDetails = "";
+                                String lastOccurrenceFile = "";
+                                
+                                while ((instanceLine = reader.readLine()) != null) {
+                                    instanceLine = instanceLine.trim();
+                                    if (instanceLine.isEmpty() || instanceLine.startsWith("Check:") || 
+                                        instanceLine.startsWith("=====") || instanceLine.startsWith("-----") ||
+                                        instanceLine.startsWith("|")) {
+                    break;
+                                    }
+                                    
+                                    if (debugMode && listener != null) {
+                                        listener.getLogger().println("[Details] Processing occurrence line: " + instanceLine);
+                                    }
+                                    
+                                    // Parse occurrences
+                                    if (instanceLine.contains(": [uninspected]") || instanceLine.startsWith(checkName + ":")) {
+                                        if (debugMode && listener != null) {
+                                            listener.getLogger().println("[Debug] Processing main occurrence line: " + instanceLine);
+                                        }
+                                        
+                                        String occurrence = instanceLine;
+                                        if (instanceLine.contains("[uninspected]")) {
+                                            occurrence = instanceLine.substring(instanceLine.indexOf("[uninspected]") + 13).trim();
+                                        } else if (instanceLine.startsWith(checkName + ":")) {
+                                            occurrence = instanceLine.substring(instanceLine.indexOf(":") + 1).trim();
+                                        }
+                                        
+                                        String occurrenceFile = "";
+                                        String occurrenceLine = "";
+                                        
+                                        int fileIndex = occurrence.indexOf("File '");
+                                        int lineIndex = occurrence.indexOf("Line '");
+                                        
+                                        if (fileIndex > 0 && lineIndex > 0) {
+                                            occurrenceFile = occurrence.substring(fileIndex + 6, occurrence.indexOf("'", fileIndex + 6));
+                                            occurrenceLine = occurrence.substring(lineIndex + 6, occurrence.indexOf("'", lineIndex + 6));
+                                            
+                                            String specificDetails = occurrence.substring(0, fileIndex).trim();
+                                            lastSpecificDetails = specificDetails;
+                                            lastOccurrenceFile = occurrenceFile;
+                                            
+                                            // 다음 라인이 "more occurrence" 라인인지 확인
+                                            String nextLine = reader.readLine();
+                                            List<String> additionalLineNumbers = new ArrayList<>();
+                                            
+                                            while (nextLine != null && nextLine.trim().contains("more occurrence")) {
+                                                String moreOccurrenceLine = nextLine.trim();
+                                                if (debugMode && listener != null) {
+                                                    listener.getLogger().println("[Debug] Found additional occurrences line: " + moreOccurrenceLine);
+                                                }
+                                                
+                                                // Extract line numbers from various formats
+                                                Pattern linePattern = Pattern.compile("line\\s+(\\d+)");
+                                                Matcher lineMatcher = linePattern.matcher(moreOccurrenceLine);
+                                                
+                                                while (lineMatcher.find()) {
+                                                    additionalLineNumbers.add(lineMatcher.group(1));
+                                                }
+                                                
+                                                if (additionalLineNumbers.isEmpty()) {
+                                                    Pattern numPattern = Pattern.compile("\\b(\\d+)\\b");
+                                                    Matcher numMatcher = numPattern.matcher(moreOccurrenceLine);
+                                                    while (numMatcher.find()) {
+                                                        additionalLineNumbers.add(numMatcher.group(1));
+                                                    }
+                                                }
+                                                
+                                                if (debugMode && listener != null) {
+                                                    listener.getLogger().println("[Debug] Found additional line numbers: " + String.join(", ", additionalLineNumbers));
+                                                }
+                                                
+                                                nextLine = reader.readLine();
+                                            }
+                                            
+                                            // 모든 라인 번호를 하나의 발생 항목으로 결합
+                                            List<String> allLineNumbers = new ArrayList<>();
+                                            allLineNumbers.add(occurrenceLine);
+                                            allLineNumbers.addAll(additionalLineNumbers);
+                                            
+                                            String combinedLineNumbers = String.join(", ", allLineNumbers.stream()
+                                                .map(num -> "'" + num + "'")
+                                                .collect(java.util.stream.Collectors.toList()));
+                                            
+                                            String formattedOccurrence = String.format("%s (File: %s, Line: %s)",
+                                                specificDetails.trim(), occurrenceFile, combinedLineNumbers);
+
+                                            // Update check item
+                                            for (CheckItem item : lintChecks) {
+                                                if (item.getName().equals(checkName)) {
+                                                    item.addOccurrence(formattedOccurrence);
+                                                    if (debugMode && listener != null) {
+                                                        listener.getLogger().println("[Details] Added occurrence to " + checkName + ": " + formattedOccurrence);
+                                                        listener.getLogger().println("[Debug] Current occurrences count for " + checkName + ": " + item.getOccurrences().size() + "/" + item.getCount());
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            // If we read past the additional occurrences, we need to go back one line
+                                            if (nextLine != null && !nextLine.trim().isEmpty() && 
+                                                !nextLine.trim().startsWith("Check:") && 
+                                                !nextLine.trim().startsWith("=====") && 
+                                                !nextLine.trim().startsWith("-----") &&
+                                                !nextLine.trim().startsWith("|")) {
+                                                instanceLine = nextLine;
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                // Update check item details
+                                for (CheckItem item : lintChecks) {
+                                    if (item.getName().equals(checkName)) {
+                                        item.setDetails(detailsBuilder.toString().trim());
+                                        if (debugMode && listener != null) {
+                                            listener.getLogger().println(String.format("[Details] Updated check item %s: (details: %s, occurrences: %d)",
+                                                checkName, detailsBuilder.toString().trim(), item.getOccurrences().size()));
+                                            listener.getLogger().println("[Debug] Item type: " + item.getType() + ", Category: " + category);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-            return result.toString();
+            
+            // Final debug logging
+            if (debugMode && listener != null) {
+                listener.getLogger().println("\n=== Final Parsing Results ===");
+                listener.getLogger().println("Total Check Items: " + lintChecks.size());
+                
+                listener.getLogger().println("\nCheck Items by Category (Detailed):");
+                for (CheckItem item : lintChecks) {
+                    listener.getLogger().println(String.format("- %s [%s] (count: %d, occurrences: %d)",
+                        item.getName(), item.getType(), item.getCount(), item.getOccurrences().size()));
+                }
+                
+                List<CheckItem> errors = getLintErrors();
+                List<CheckItem> warnings = getLintWarnings();
+                List<CheckItem> infos = getLintInfo();
+                
+                listener.getLogger().println("\nCategory Counts:");
+                listener.getLogger().println("Errors: " + errors.size() + " (Total items: " + errors.stream().mapToInt(CheckItem::getCount).sum() + ")");
+                listener.getLogger().println("Warnings: " + warnings.size() + " (Total items: " + warnings.stream().mapToInt(CheckItem::getCount).sum() + ")");
+                listener.getLogger().println("Info: " + infos.size() + " (Total items: " + infos.stream().mapToInt(CheckItem::getCount).sum() + ")");
+            }
         } catch (IOException e) {
-            return "Error reading details: " + e.getMessage();
-        }
-    }
-
-    private String extractSection(File file, String startMarker, String endMarker) throws IOException {
-        StringBuilder section = new StringBuilder();
-        boolean inSection = false;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains(startMarker)) {
-                    inSection = true;
-                    continue;
-                }
-                if (line.contains(endMarker)) {
-                    break;
-                }
-                if (inSection && !line.trim().isEmpty()) {
-                    section.append(line).append("\n");
-                }
+            if (debugMode && listener != null) {
+                listener.error("Failed to read lint report: " + e.getMessage());
+                e.printStackTrace(listener.getLogger());
             }
         }
-        return section.toString();
     }
 
-    public Map<String, Integer> getLintResults() {
-        return lintResults;
+    private void parseCDCReport() throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(cdcReportPath), StandardCharsets.UTF_8))) {
+            // CDC report parsing logic here
+        }
     }
 
-    public Map<String, Integer> getCdcResults() {
-        return cdcResults;
+    private void parseLintCheckDetails(String line) {
+        // Check: 1 [Category: Error] (6) Details text here
+        Pattern pattern = Pattern.compile("Check:\\s*(\\d+)\\s*\\[Category:\\s*([^\\]]+)\\]\\s*\\((\\d+)\\)\\s*(.+)");
+        Matcher matcher = pattern.matcher(line);
+        
+        if (matcher.find()) {
+            String checkNumber = matcher.group(1);
+            String category = matcher.group(2);
+            int count = Integer.parseInt(matcher.group(3));
+            String details = matcher.group(4);
+            
+            String name = String.format("Check %s", checkNumber);
+            lintChecks.add(new CheckItem(name, count, details, category));
+            
+            // Debug logging
+            if (listener != null) {
+                listener.getLogger().println("Parsed check: " + name + " (" + count + ")");
+            }
+        }
     }
 
     @Override
     public String getIconFileName() {
-        return "/plugin/questa-formal-result/images/chart.png";
+        return "graph.gif";
     }
 
     @Override
@@ -175,301 +413,139 @@ public class QuestaFormalResult implements Action {
 
     @Override
     public String getUrlName() {
-        return "questa-formal";  // URL 경로를 이전 값으로 복원
-    }
-
-    public List<CheckItem> getLintErrorChecks() {
-        return getLintChecks("Error");
-    }
-
-    public List<CheckItem> getLintWarningChecks() {
-        return getLintChecks("Warning");
-    }
-
-    public List<CheckItem> getLintInfoChecks() {
-        return getLintChecks("Info");
-    }
-
-    private List<CheckItem> getLintChecks(String type) {
-        List<CheckItem> result = new ArrayList<>();
-        try {
-            String content = extractSection(lintReportFile, "| " + type + " (", "----------------");
-            Pattern checkPattern = Pattern.compile("Check: (.*?)\\[Category:.*?\\] \\((\\d+)\\)(.*?)", Pattern.DOTALL);
-            Matcher checkMatcher = checkPattern.matcher(content);
-
-            while (checkMatcher.find()) {
-                String name = checkMatcher.group(1).trim();
-                int count = Integer.parseInt(checkMatcher.group(2).trim());
-                String details = checkMatcher.group(3).trim();
-                result.add(new CheckItem(name, count, details));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public List<ViolationItem> getCdcViolations() {
-        return getCdcChecks("Violations");
-    }
-
-    public List<ViolationItem> getCdcCautions() {
-        return getCdcChecks("Cautions");
-    }
-
-    private List<ViolationItem> getCdcChecks(String type) {
-        List<ViolationItem> result = new ArrayList<>();
-        try {
-            String content = extractSection(cdcReportFile, type + " (", "Evaluations (");
-            Pattern checkPattern = Pattern.compile("(.*?)\\((\\d+)\\)(.*?)", Pattern.DOTALL);
-            Matcher checkMatcher = checkPattern.matcher(content);
-
-            while (checkMatcher.find()) {
-                String name = checkMatcher.group(1).trim();
-                int count = Integer.parseInt(checkMatcher.group(2).trim());
-                String details = checkMatcher.group(3).trim();
-                result.add(new ViolationItem(name, count, details));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return "questaformal-result";
     }
 
     public String getLintDesign() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(lintReportFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("Design               :")) {
-                    return line.split(":")[1].trim();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "N/A";
+        return lintDesign;
     }
 
     public String getLintTimestamp() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(lintReportFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("Timestamp            :")) {
-                    String[] mainParts = line.split(":", 2);
-                    if (mainParts.length < 2) continue;
-                    
-                    String timestamp = mainParts[1].trim();
-                    String[] parts = timestamp.split("\\s+");
-                    
-                    if (parts.length >= 5) {
-                        // Wed Mar 26 14:24:27 2025 -> 2025 Mar 26, 14:24
-                        String[] timeParts = parts[3].split(":");
-                        return String.format("%s-%s-%s,  %s:%s",
-                            parts[4],      // Year (2025)
-                            parts[1],      // Month (Mar)
-                            parts[2],      // Day (26)
-                            timeParts[0],  // Hour (14)
-                            timeParts[1]   // Minute (24)
-                        );
-                    }
-                    return timestamp;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error parsing timestamp: " + e.getMessage());
-        }
-        return "N/A";
+        return lintTimestamp;
     }
 
-    public String getQualityScore() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(lintReportFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("Design Quality Score :")) {
-                    return line.split(":")[1].trim();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "N/A";
+    public double getQualityScore() {
+        return qualityScore;
     }
 
-    public int getQualityScoreRotation() {
-        String score = getQualityScore();
-        if (score.equals("N/A")) return 0;
-        
-        try {
-            double percentage = Double.parseDouble(score.replace("%", ""));
-            // 반원 게이지를 위한 SVG viewBox 좌표계에 맞춰 각도 계산
-            // 0% = -90도(왼쪽), 50% = 0도(중앙), 100% = 90도(오른쪽)
-            return (int)(-90 + (180 * percentage / 100.0));
-        } catch (NumberFormatException e) {
-            return -90; // 0% 위치
-        }
+    public int getLintErrorCount() {
+        return lintErrorCount;
     }
 
-    public String getQualityLevel() {
-        String score = getQualityScore();
-        if (score.equals("N/A")) return "poor";
-        
-        try {
-            double percentage = Double.parseDouble(score.replace("%", ""));
-            if (percentage >= 90) return "good";
-            if (percentage >= 50) return "normal";
-            return "poor";
-        } catch (NumberFormatException e) {
-            return "poor";
+    public int getLintWarningCount() {
+        return lintWarningCount;
+    }
+
+    public int getLintInfoCount() {
+        return lintInfoCount;
+    }
+
+    public List<CheckItem> getAllLintChecks() {
+        return lintChecks;
+    }
+
+    public List<CheckItem> getLintErrors() {
+        return lintChecks.stream()
+                .filter(check -> check.getType().equals("Error"))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<CheckItem> getLintWarnings() {
+        return lintChecks.stream()
+                .filter(check -> check.getType().equals("Warning"))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<CheckItem> getLintInfo() {
+        return lintChecks.stream()
+                .filter(check -> check.getType().equals("Info"))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public Map<String, Integer> getLintResults() {
+        Map<String, Integer> results = new HashMap<>();
+        results.put("errors", lintErrorCount);
+        results.put("warnings", lintWarningCount);
+        results.put("info", lintInfoCount);
+        return results;
+    }
+
+    public double getQualityScorePercentage() {
+        return qualityScore;
+    }
+
+    public String getDebugInfo() {
+        return String.format(
+            "Design: %s, Timestamp: %s, Quality Score: %.1f, Errors: %d, Warnings: %d, Info: %d",
+            lintDesign, lintTimestamp, qualityScore, lintErrorCount, lintWarningCount, lintInfoCount
+        );
+    }
+
+    public void logToConsole(String message) {
+        if (debugMode) {
+            System.out.println("[Questa Formal Debug] " + message);
         }
     }
 
-    public float getQualityScorePercentage() {
-        String score = getQualityScore();
-        if (score.equals("N/A")) return 0;
-        
-        try {
-            return Float.parseFloat(score.replace("%", ""));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+    public boolean isDebugMode() {
+        return debugMode;
     }
 
-    public int getErrorCount() {
-        return lintResults.getOrDefault("errors", 0);
-    }
-
-    public int getWarningCount() {
-        return lintResults.getOrDefault("warnings", 0);
-    }
-
-    public int getInfoCount() {
-        return lintResults.getOrDefault("info", 0);
-    }
-
-    public String getErrorDetails() {
-        return getDetails("lint-errors");
-    }
-
-    public String getWarningDetails() {
-        return getDetails("lint-warnings");
-    }
-
-    public String getInfoDetails() {
-        return getDetails("lint-info");
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     public static class CheckItem {
-        public final String name;
-        public final int count;
-        public final String details;
-        public final String id;
+        private final String name;
+        private final int count;
+        private String details;
+        private final String id;
+        private List<String> occurrences;
+        private final String type;
 
-        public CheckItem(String name, int count, String details) {
+        public CheckItem(String name, int count, String details, String type) {
             this.name = name;
             this.count = count;
             this.details = details;
             this.id = name.toLowerCase().replaceAll("\\s+", "-");
-        }
-    }
-
-    public static class ViolationItem {
-        public final String type;
-        public final int count;
-        public final String details;
-        public final String id;
-
-        public ViolationItem(String type, int count, String details) {
+            this.occurrences = new ArrayList<>();
             this.type = type;
-            this.count = count;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public String getDetails() {
+            return details;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getSanitizedName() {
+            return name.replaceAll("[^a-zA-Z0-9]", "_");
+        }
+
+        public List<String> getOccurrences() {
+            return occurrences;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setDetails(String details) {
             this.details = details;
-            this.id = type.toLowerCase().replaceAll("\\s+", "-");
-        }
-    }
-
-    public static class LintSummaryItem {
-        private final String category;
-        private final String name;
-        private final int count;
-
-        public LintSummaryItem(String category, String name, int count) {
-            this.category = category;
-            this.name = name;
-            this.count = count;
         }
 
-        public String getCategory() { return category; }
-        public String getName() { return name; }
-        public int getCount() { return count; }
-    }
-
-    public List<LintSummaryItem> getLintSummary() {
-        List<LintSummaryItem> summary = new ArrayList<>();
-        if (listener != null) {
-            listener.getLogger().println("Reading lint report from: " + lintReportFile.getAbsolutePath());
+        public void addOccurrence(String occurrence) {
+            this.occurrences.add(occurrence);
         }
-        try (BufferedReader reader = new BufferedReader(new FileReader(lintReportFile))) {
-            String line;
-            String currentCategory = null;
-            boolean inSummarySection = false;
-            while ((line = reader.readLine()) != null) {
-                // Skip separator lines (e.g. "-----" or "=====")
-                if (line.trim().matches("[-=]+")) continue;
-                if (line.contains("Section 1 : Check Summary")) {
-                    inSummarySection = true;
-                    if (listener != null) {
-                        listener.getLogger().println("Found Section 1");
-                    }
-                    continue;
-                }
-                if (!inSummarySection) continue;
-                if (line.contains("Section 2")) {
-                    if (listener != null) {
-                        listener.getLogger().println("End of Section 1");
-                    }
-                    break;
-                }
-                // Category header, e.g. "| Error (7) |"
-                if (line.trim().startsWith("| ") && line.contains(" (")) {
-                    currentCategory = line.split("\\(")[0].replace("|", "").trim();
-                    if (listener != null) {
-                        listener.getLogger().println("Found category: " + currentCategory);
-                    }
-                    continue;
-                }
-                // Parse item lines like "  assign_width_underflow : 6"
-                if (currentCategory != null && !line.startsWith("|") && line.contains(":")) {
-                    String[] parts = line.trim().split("\\s*:\\s*");
-                    if (parts.length == 2) {
-                        try {
-                            String name = parts[0].trim();
-                            int count = Integer.parseInt(parts[1].trim());
-                            summary.add(new LintSummaryItem(currentCategory, name, count));
-                            if (listener != null) {
-                                listener.getLogger().println(
-                                    String.format("Added item: %s - %s: %d", currentCategory, name, count));
-                            }
-                        } catch (NumberFormatException e) {
-                            if (listener != null) {
-                                listener.getLogger().println("Failed to parse count in line: " + line);
-                            }
-                        }
-                    }
-                }
-            }
-            if (listener != null) {
-                listener.getLogger().println("Total items parsed: " + summary.size());
-                for (LintSummaryItem item : summary) {
-                    listener.getLogger().println(
-                        String.format("%s: %s (%d)", item.getCategory(), item.getName(), item.getCount()));
-                }
-            }
-        } catch (IOException e) {
-            if (listener != null) {
-                listener.getLogger().println("Error reading lint report: " + e.getMessage());
-                e.printStackTrace(listener.getLogger());
-            }
-        }
-        return summary;
     }
 }

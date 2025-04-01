@@ -8,11 +8,11 @@ public class InjectedTest extends junit.framework.TestCase {
   public static junit.framework.Test suite() throws Exception {
     System.out.println("Running tests for "+"io.jenkins.plugins:questa-formal-result:1.0-SNAPSHOT");
     Map<String, Object> parameters = new HashMap<String, Object>();
-    parameters.put("basedir","D:\\X2_copilot\\questa_plugin1");
+    parameters.put("basedir","D:\\X1_cursor\\questa-formal-jenkins-plugin");
     parameters.put("artifactId","questa-formal-result");
     parameters.put("packaging","hpi");
-    parameters.put("outputDirectory","D:\\X2_copilot\\questa_plugin1\\target\\classes");
-    parameters.put("testOutputDirectory","D:\\X2_copilot\\questa_plugin1\\target\\test-classes");
+    parameters.put("outputDirectory","D:\\X1_cursor\\questa-formal-jenkins-plugin\\target\\classes");
+    parameters.put("testOutputDirectory","D:\\X1_cursor\\questa-formal-jenkins-plugin\\target\\test-classes");
     parameters.put("requirePI","true");
     return org.jvnet.hudson.test.PluginAutomaticTestBuilder.build(parameters);
   }

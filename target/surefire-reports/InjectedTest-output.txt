@@ -1,72 +1,72 @@
-Mar 28, 2025 3:55:21 PM org.jvnet.hudson.test.WarExploder explode
-INFO: Exploding C:\Users\csjo\.m2\repository\org\jenkins-ci\main\jenkins-war\2.361.1\jenkins-war-2.361.1.war into D:\X2_copilot\questa_plugin1\target\jenkins-for-test
-Mar 28, 2025 3:55:30 PM org.eclipse.jetty.server.handler.ContextHandler setContextPath
+Apr 01, 2025 2:21:36 PM org.jvnet.hudson.test.WarExploder explode
+INFO: Exploding C:\Users\csjo\.m2\repository\org\jenkins-ci\main\jenkins-war\2.361.1\jenkins-war-2.361.1.war into D:\X1_cursor\questa-formal-jenkins-plugin\target\jenkins-for-test
+Apr 01, 2025 2:21:47 PM org.eclipse.jetty.server.handler.ContextHandler setContextPath
 WARNING: Empty contextPath
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.server.Server doStart
+Apr 01, 2025 2:21:47 PM org.eclipse.jetty.server.Server doStart
 INFO: jetty-9.4.49.v20220914; built: 2022-09-14T01:07:36.601Z; git: 4231a3b2e4cb8548a412a789936d640a97b1aa0a; jvm 17.0.14+7
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.webapp.StandardDescriptorProcessor visitServlet
+Apr 01, 2025 2:21:48 PM org.eclipse.jetty.webapp.StandardDescriptorProcessor visitServlet
 INFO: NO JSP Support for /, did not find org.eclipse.jetty.jsp.JettyJspServlet
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
+Apr 01, 2025 2:21:48 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
 INFO: DefaultSessionIdManager workerName=node0
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
+Apr 01, 2025 2:21:48 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
 INFO: No SessionScavenger set, using defaults
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.server.session.HouseKeeper startScavenging
-INFO: node0 Scavenging every 660000ms
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.server.handler.ContextHandler doStart
-INFO: Started o.e.j.w.WebAppContext@66bacdbc{Jenkins v2.361.1,/,file:///D:/X2_copilot/questa_plugin1/target/jenkins-for-test/,AVAILABLE}{D:\X2_copilot\questa_plugin1\target\jenkins-for-test}
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.server.AbstractConnector doStart
-INFO: Started ServerConnector@56ba8773{HTTP/1.1, (http/1.1)}{localhost:59806}
-Mar 28, 2025 3:55:31 PM org.eclipse.jetty.server.Server doStart
-INFO: Started @11998ms
-Mar 28, 2025 3:55:31 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:48 PM org.eclipse.jetty.server.session.HouseKeeper startScavenging
+INFO: node0 Scavenging every 600000ms
+Apr 01, 2025 2:21:48 PM org.eclipse.jetty.server.handler.ContextHandler doStart
+INFO: Started o.e.j.w.WebAppContext@66bacdbc{Jenkins v2.361.1,/,file:///D:/X1_cursor/questa-formal-jenkins-plugin/target/jenkins-for-test/,AVAILABLE}{D:\X1_cursor\questa-formal-jenkins-plugin\target\jenkins-for-test}
+Apr 01, 2025 2:21:48 PM org.eclipse.jetty.server.AbstractConnector doStart
+INFO: Started ServerConnector@56ba8773{HTTP/1.1, (http/1.1)}{localhost:54765}
+Apr 01, 2025 2:21:48 PM org.eclipse.jetty.server.Server doStart
+INFO: Started @14376ms
+Apr 01, 2025 2:21:48 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Started initialization
-Mar 28, 2025 3:55:32 PM hudson.PluginManager considerDetachedPlugin
-INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins12044319810873556048\plugins\javax-activation-api.jpi
-Mar 28, 2025 3:55:32 PM hudson.PluginManager considerDetachedPlugin
-INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins12044319810873556048\plugins\javax-mail-api.jpi
-Mar 28, 2025 3:55:33 PM hudson.PluginManager considerDetachedPlugin
-INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins12044319810873556048\plugins\bouncycastle-api.jpi
-Mar 28, 2025 3:55:33 PM hudson.PluginManager considerDetachedPlugin
-INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins12044319810873556048\plugins\instance-identity.jpi
-Mar 28, 2025 3:55:33 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:49 PM hudson.PluginManager considerDetachedPlugin
+INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins603860043560979696\plugins\javax-activation-api.jpi
+Apr 01, 2025 2:21:49 PM hudson.PluginManager considerDetachedPlugin
+INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins603860043560979696\plugins\javax-mail-api.jpi
+Apr 01, 2025 2:21:49 PM hudson.PluginManager considerDetachedPlugin
+INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins603860043560979696\plugins\bouncycastle-api.jpi
+Apr 01, 2025 2:21:50 PM hudson.PluginManager considerDetachedPlugin
+INFO: Loading a detached plugin as a dependency: C:\Users\csjo\AppData\Local\Temp\jenkins603860043560979696\plugins\instance-identity.jpi
+Apr 01, 2025 2:21:50 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Listed all plugins
-Mar 28, 2025 3:55:34 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:51 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Prepared all plugins
-Mar 28, 2025 3:55:34 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:51 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Started all plugins
-Mar 28, 2025 3:55:34 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:51 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Augmented all extensions
-Mar 28, 2025 3:55:36 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:56 PM jenkins.InitReactorRunner$1 onAttained
 INFO: System config loaded
-Mar 28, 2025 3:55:36 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:56 PM jenkins.InitReactorRunner$1 onAttained
 INFO: System config adapted
-Mar 28, 2025 3:55:36 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:56 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Loaded all jobs
-Mar 28, 2025 3:55:36 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:56 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Configuration for all jobs updated
-Mar 28, 2025 3:55:36 PM jenkins.InitReactorRunner$1 onAttained
+Apr 01, 2025 2:21:56 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Completed initialization
-Mar 28, 2025 3:55:36 PM org.eclipse.jetty.server.Server doStart
+Apr 01, 2025 2:21:56 PM org.eclipse.jetty.server.Server doStart
 INFO: jetty-9.4.49.v20220914; built: 2022-09-14T01:07:36.601Z; git: 4231a3b2e4cb8548a412a789936d640a97b1aa0a; jvm 17.0.14+7
-Mar 28, 2025 3:55:36 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
+Apr 01, 2025 2:21:56 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
 INFO: DefaultSessionIdManager workerName=node0
-Mar 28, 2025 3:55:36 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
+Apr 01, 2025 2:21:56 PM org.eclipse.jetty.server.session.DefaultSessionIdManager doStart
 INFO: No SessionScavenger set, using defaults
-Mar 28, 2025 3:55:36 PM org.eclipse.jetty.server.session.HouseKeeper startScavenging
+Apr 01, 2025 2:21:56 PM org.eclipse.jetty.server.session.HouseKeeper startScavenging
 INFO: node0 Scavenging every 660000ms
-Mar 28, 2025 3:55:36 PM org.eclipse.jetty.server.handler.ContextHandler doStart
+Apr 01, 2025 2:21:56 PM org.eclipse.jetty.server.handler.ContextHandler doStart
 INFO: Started o.e.j.s.ServletContextHandler@44b194fe{/,null,AVAILABLE}
-Mar 28, 2025 3:55:36 PM org.eclipse.jetty.server.AbstractConnector doStart
-INFO: Started ServerConnector@3fe46690{HTTP/1.1, (http/1.1)}{0.0.0.0:59809}
-Mar 28, 2025 3:55:36 PM org.eclipse.jetty.server.Server doStart
-INFO: Started @17358ms
-Mar 28, 2025 3:55:41 PM org.eclipse.jetty.server.AbstractConnector doStop
+Apr 01, 2025 2:21:56 PM org.eclipse.jetty.server.AbstractConnector doStart
+INFO: Started ServerConnector@3fe46690{HTTP/1.1, (http/1.1)}{0.0.0.0:54770}
+Apr 01, 2025 2:21:56 PM org.eclipse.jetty.server.Server doStart
+INFO: Started @23038ms
+Apr 01, 2025 2:22:00 PM org.eclipse.jetty.server.AbstractConnector doStop
 INFO: Stopped ServerConnector@56ba8773{HTTP/1.1, (http/1.1)}{localhost:0}
-Mar 28, 2025 3:55:41 PM org.eclipse.jetty.server.session.HouseKeeper stopScavenging
+Apr 01, 2025 2:22:00 PM org.eclipse.jetty.server.session.HouseKeeper stopScavenging
 INFO: node0 Stopped scavenging
-Mar 28, 2025 3:55:41 PM org.eclipse.jetty.server.handler.ContextHandler doStop
-INFO: Stopped o.e.j.w.WebAppContext@66bacdbc{Jenkins v2.361.1,/,file:///D:/X2_copilot/questa_plugin1/target/jenkins-for-test/,STOPPED}{D:\X2_copilot\questa_plugin1\target\jenkins-for-test}
-Mar 28, 2025 3:55:41 PM hudson.lifecycle.Lifecycle onStatusUpdate
+Apr 01, 2025 2:22:00 PM org.eclipse.jetty.server.handler.ContextHandler doStop
+INFO: Stopped o.e.j.w.WebAppContext@66bacdbc{Jenkins v2.361.1,/,file:///D:/X1_cursor/questa-formal-jenkins-plugin/target/jenkins-for-test/,STOPPED}{D:\X1_cursor\questa-formal-jenkins-plugin\target\jenkins-for-test}
+Apr 01, 2025 2:22:00 PM hudson.lifecycle.Lifecycle onStatusUpdate
 INFO: Stopping Jenkins
-Mar 28, 2025 3:55:41 PM hudson.lifecycle.Lifecycle onStatusUpdate
+Apr 01, 2025 2:22:01 PM hudson.lifecycle.Lifecycle onStatusUpdate
 INFO: Jenkins stopped

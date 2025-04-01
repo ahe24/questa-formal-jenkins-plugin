@@ -7,127 +7,128 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Recorder;
-import hudson.tasks.Publisher;
-import java.io.File;
+import hudson.tasks.Builder;
+import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 
-@Extension
-public class QuestaFormalBuildStep extends Recorder {
-    private String lintReportPath;
-    private String cdcReportPath;
+import java.io.File;
+import java.io.IOException;
+
+public class QuestaFormalBuildStep extends Builder {
+    private static final String DEFAULT_LINT_REPORT_PATH = "Lint_Results/lint.rpt";
+    private static final String DEFAULT_CDC_REPORT_PATH = "CDC_result/cdc_detail.rpt";
     
-    public QuestaFormalBuildStep() {
-        this.lintReportPath = "Lint_Results/lint.rpt";
-        this.cdcReportPath = "CDC_result/cdc.rpt";
-    }
-    
+    private final String lintReportPath;
+    private final String cdcReportPath;
+
     @DataBoundConstructor
     public QuestaFormalBuildStep(String lintReportPath, String cdcReportPath) {
-        this.lintReportPath = lintReportPath;
-        this.cdcReportPath = cdcReportPath;
-    }
-
-    @DataBoundSetter
-    public void setLintReportPath(String lintReportPath) {
-        this.lintReportPath = lintReportPath;
-    }
-
-    @DataBoundSetter
-    public void setCdcReportPath(String cdcReportPath) {
-        this.cdcReportPath = cdcReportPath;
+        this.lintReportPath = lintReportPath != null && !lintReportPath.trim().isEmpty() 
+            ? lintReportPath.trim() 
+            : DEFAULT_LINT_REPORT_PATH;
+        this.cdcReportPath = cdcReportPath != null && !cdcReportPath.trim().isEmpty() 
+            ? cdcReportPath.trim() 
+            : DEFAULT_CDC_REPORT_PATH;
     }
 
     public String getLintReportPath() {
-        return lintReportPath != null ? lintReportPath : "Lint_Results/lint.rpt";
+        return lintReportPath;
     }
 
     public String getCdcReportPath() {
-        return cdcReportPath != null ? cdcReportPath : "CDC_result/cdc.rpt";
+        return cdcReportPath;
     }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         try {
+            // Get workspace
             FilePath workspace = build.getWorkspace();
-            if (workspace != null) {
-                FilePath lintFile = workspace.child(getLintReportPath());
-                FilePath cdcFile = workspace.child(getCdcReportPath());
-                
-                listener.getLogger().println("\n=== Questa Formal Analysis Debug Log ===");
-                listener.getLogger().println("Workspace: " + workspace.getRemote());
-                listener.getLogger().println("Looking for lint report at: " + lintFile.getRemote());
-                
-                if (lintFile.exists()) {
-                    // 파일 전체 내용 읽기
-                    String content = lintFile.readToString();
-                    listener.getLogger().println("\n=== Lint Report Content ===");
-                    
-                    // Check Summary 섹션 찾기
-                    int summaryStart = content.indexOf("Section 1 : Check Summary");
-                    int summaryEnd = content.indexOf("Section 2");
-                    
-                    if (summaryStart != -1 && summaryEnd != -1) {
-                        String summarySection = content.substring(summaryStart, summaryEnd);
-                        listener.getLogger().println("\n=== Check Summary Section ===");
-                        listener.getLogger().println(summarySection);
-                        
-                        // Create result object with detailed logging
-                        listener.getLogger().println("\n=== Parsing Results ===");
-                        QuestaFormalResult result = new QuestaFormalResult(
-                            new File(lintFile.getRemote()),
-                            cdcFile.exists() ? new File(cdcFile.getRemote()) : null,
-                            listener
-                        );
-                        
-                        // Log detailed summary
-                        listener.getLogger().println("\n=== Parsed Summary ===");
-                        listener.getLogger().println("Error count: " + result.getErrorCount());
-                        listener.getLogger().println("Warning count: " + result.getWarningCount());
-                        listener.getLogger().println("Info count: " + result.getInfoCount());
-                        
-                        // Log individual items
-                        listener.getLogger().println("\n=== Detailed Items ===");
-                        for (QuestaFormalResult.LintSummaryItem item : result.getLintSummary()) {
-                            listener.getLogger().println(String.format("%s - %s: %d", 
-                                item.getCategory(), item.getName(), item.getCount()));
-                        }
-                        
-                        build.addAction(result);
-                        listener.getLogger().println("\n=== Processing Complete ===");
-                        return true;
-                    } else {
-                        listener.error("Could not find Check Summary section in lint report");
-                        return false;
-                    }
-                } else {
-                    listener.error("Lint report file not found at: " + getLintReportPath());
-                    listener.error("Current directory contents:");
-                    for (FilePath child : workspace.list()) {
-                        listener.error("  " + child.getName());
-                    }
-                    return false;
-                }
+            if (workspace == null) {
+                listener.error("Workspace is null");
+                return false;
             }
-            listener.error("Workspace is null");
+
+            // Get report paths
+            String effectiveLintPath = lintReportPath != null && !lintReportPath.trim().isEmpty() 
+                ? lintReportPath.trim() 
+                : DEFAULT_LINT_REPORT_PATH;
+            
+            String effectiveCdcPath = cdcReportPath != null && !cdcReportPath.trim().isEmpty() 
+                ? cdcReportPath.trim() 
+                : DEFAULT_CDC_REPORT_PATH;
+
+            // Log workspace and report paths
+            listener.getLogger().println("Workspace path: " + workspace.getRemote());
+            listener.getLogger().println("Looking for Lint report at: " + workspace.getRemote() + "/" + effectiveLintPath);
+            listener.getLogger().println("Looking for CDC report at: " + workspace.getRemote() + "/" + effectiveCdcPath);
+
+            // Get report files
+            FilePath lintReport = workspace.child(effectiveLintPath);
+            FilePath cdcReport = workspace.child(effectiveCdcPath);
+
+            // Check if files exist
+            if (!lintReport.exists()) {
+                listener.error("Lint report file not found at: " + lintReport.getRemote());
+                return false;
+            }
+
+            // Add action to build with direct file paths
+            build.addAction(new QuestaFormalResult(lintReport.getRemote(), cdcReport.exists() ? cdcReport.getRemote() : null, listener));
+
+            return true;
+        } catch (IOException e) {
+            listener.error("IO error: " + e.getMessage());
+            e.printStackTrace(listener.getLogger());
+            return false;
+        } catch (InterruptedException e) {
+            listener.error("Build was interrupted: " + e.getMessage());
+            Thread.currentThread().interrupt();
             return false;
         } catch (Exception e) {
-            e.printStackTrace(listener.error("Error processing Questa Formal results"));
+            listener.error("Unexpected error: " + e.getMessage());
+            e.printStackTrace(listener.getLogger());
             return false;
         }
     }
 
     @Extension
-    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-        @Override
-        public String getDisplayName() {
-            return "Add Questa Formal Results";
+    public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+        public FormValidation doCheckLintReportPath(@QueryParameter String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return FormValidation.ok("Using default path: " + DEFAULT_LINT_REPORT_PATH);
+            }
+            
+            // Check for absolute paths
+            if (value.startsWith("/") || value.matches("^[A-Za-z]:\\\\.*")) {
+                return FormValidation.warning("Absolute paths are not recommended. Consider using a path relative to the workspace.");
+            }
+            
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckCdcReportPath(@QueryParameter String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return FormValidation.ok("Using default path: " + DEFAULT_CDC_REPORT_PATH);
+            }
+            
+            // Check for absolute paths
+            if (value.startsWith("/") || value.matches("^[A-Za-z]:\\\\.*")) {
+                return FormValidation.warning("Absolute paths are not recommended. Consider using a path relative to the workspace.");
+            }
+            
+            return FormValidation.ok();
         }
 
         @Override
-        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Add Questa Formal Results";
         }
     }
 }
