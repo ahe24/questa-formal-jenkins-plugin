@@ -1,0 +1,18 @@
+<?jelly escape-by-default='true'?>
+<div>
+    <p>
+        This plugin parses and displays Questa Formal verification results, including:
+    </p>
+    <ul>
+        <li><b>Lint Report</b>: Displays design quality metrics, errors, warnings, and information items.</li>
+        <li><b>CDC Report</b>: Shows Clock Domain Crossing analysis results.</li>
+    </ul>
+    <h3>Configuration</h3>
+    <ul>
+        <li><b>Lint Report Path</b>: Path to the Questa Formal Lint report file (default: Lint_Results/lint.rpt)</li>
+        <li><b>CDC Report Path</b>: Path to the CDC analysis report file (default: CDC_result/cdc.rpt)</li>
+    </ul>
+    <p>
+        All paths should be relative to the workspace directory. Absolute paths are not recommended.
+    </p>
+</div> 

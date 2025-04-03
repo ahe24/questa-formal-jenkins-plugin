@@ -1,17 +1,33 @@
 package io.jenkins.plugins.questaformal;
 
-import hudson.model.Action;
-import hudson.model.BuildListener;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Publisher;
+import hudson.tasks.Recorder;
+import hudson.util.FormValidation;
+import jenkins.tasks.SimpleBuildStep;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class QuestaFormalResult implements Action {
+public class QuestaFormalResult extends Recorder implements SimpleBuildStep {
+    private static final String DEFAULT_LINT_REPORT_PATH = "Lint_Results/lint.rpt";
+    private static final String DEFAULT_CDC_REPORT_PATH = "CDC_result/cdc.rpt";
+    
     private final String lintReportPath;
     private final String cdcReportPath;
-    private final BuildListener listener;
+    private boolean debugMode;
     private List<CheckItem> lintChecks = new ArrayList<>();
     private String lintDesign = "";
     private String lintTimestamp = "";
@@ -19,29 +35,79 @@ public class QuestaFormalResult implements Action {
     private int lintErrorCount = 0;
     private int lintWarningCount = 0;
     private int lintInfoCount = 0;
-    private boolean debugMode = false;  // 디버그 모드 플래그 추가
 
-    public QuestaFormalResult(String lintReportPath, String cdcReportPath, BuildListener listener) {
-        this.lintReportPath = lintReportPath;
-        this.cdcReportPath = cdcReportPath;
-        this.listener = listener;
-        parseLintReport();
+    @DataBoundConstructor
+    public QuestaFormalResult(String lintReportPath, String cdcReportPath) {
+        this.lintReportPath = lintReportPath != null && !lintReportPath.trim().isEmpty() 
+            ? lintReportPath.trim() 
+            : DEFAULT_LINT_REPORT_PATH;
+        this.cdcReportPath = cdcReportPath != null && !cdcReportPath.trim().isEmpty() 
+            ? cdcReportPath.trim() 
+            : DEFAULT_CDC_REPORT_PATH;
+        this.debugMode = false;
     }
 
-    private void parseLintReport() {
+    public String getLintReportPath() {
+        return lintReportPath;
+    }
+
+    public String getCdcReportPath() {
+        return cdcReportPath;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
+
+    @Override
+    public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         if (lintReportPath == null) {
-            if (debugMode && listener != null) {
+            if (debugMode) {
                 listener.error("Lint report path is null");
             }
             return;
         }
 
-        if (debugMode && listener != null) {
+        if (debugMode) {
             listener.getLogger().println("\n=== Starting Lint Report Parsing ===");
             listener.getLogger().println("Report path: " + lintReportPath);
         }
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(lintReportPath), StandardCharsets.UTF_8))) {
+        FilePath reportFile = workspace.child(lintReportPath);
+        if (!reportFile.exists()) {
+            listener.error("Lint report file not found: " + lintReportPath);
+            return;
+        }
+
+        parseLintReport(reportFile, listener);
+        
+        // Create and add action
+        QuestaFormalResultAction action = new QuestaFormalResultAction(
+            lintDesign, lintTimestamp, qualityScore,
+            lintErrorCount, lintWarningCount, lintInfoCount,
+            lintChecks, debugMode
+        );
+        
+        if (debugMode) {
+            listener.getLogger().println("\n=== Adding QuestaFormalResultAction ===");
+            listener.getLogger().println("Design: " + lintDesign);
+            listener.getLogger().println("Timestamp: " + lintTimestamp);
+            listener.getLogger().println("Quality Score: " + qualityScore);
+            listener.getLogger().println("Error Count: " + lintErrorCount);
+            listener.getLogger().println("Warning Count: " + lintWarningCount);
+            listener.getLogger().println("Info Count: " + lintInfoCount);
+            listener.getLogger().println("Total Checks: " + lintChecks.size());
+        }
+        
+        run.addAction(action);
+        
+        if (debugMode) {
+            listener.getLogger().println("Action added successfully");
+        }
+    }
+
+    private void parseLintReport(FilePath reportFile, TaskListener listener) throws IOException, InterruptedException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(reportFile.read(), StandardCharsets.UTF_8))) {
             String line;
             boolean isSummarySection = false;
             boolean isDetailsSection = false;
@@ -56,7 +122,7 @@ public class QuestaFormalResult implements Action {
                     String[] parts = line.split(":", 2);
                     if (parts.length > 1) {
                         lintDesign = parts[1].trim();
-                        if (debugMode && listener != null) {
+                        if (debugMode) {
                             listener.getLogger().println("[Header] Found Design: " + lintDesign);
                         }
                     }
@@ -65,7 +131,7 @@ public class QuestaFormalResult implements Action {
                     String[] parts = line.split(":", 2);
                     if (parts.length > 1) {
                         lintTimestamp = parts[1].trim();
-                        if (debugMode && listener != null) {
+                        if (debugMode) {
                             listener.getLogger().println("Found Timestamp: " + lintTimestamp);
                         }
                     }
@@ -76,12 +142,12 @@ public class QuestaFormalResult implements Action {
                         String scoreStr = parts[1].trim().replace("%", "");
                         try {
                             qualityScore = Double.parseDouble(scoreStr);
-                            if (debugMode && listener != null) {
+                            if (debugMode) {
                                 listener.getLogger().println("Found Quality Score: " + qualityScore);
                             }
                         } catch (NumberFormatException e) {
                             qualityScore = 0.0;
-                            if (debugMode && listener != null) {
+                            if (debugMode) {
                                 listener.getLogger().println("Failed to parse Quality Score, defaulting to 0.0");
                             }
                         }
@@ -92,7 +158,7 @@ public class QuestaFormalResult implements Action {
                 if (line.contains("Section 1 : Check Summary")) {
                     isSummarySection = true;
                     isDetailsSection = false;
-                    if (debugMode && listener != null) {
+                    if (debugMode) {
                         listener.getLogger().println("\n=== Entering Summary Section ===");
                     }
                     continue;
@@ -100,7 +166,7 @@ public class QuestaFormalResult implements Action {
                 else if (line.contains("Section 2 : Check Details")) {
                     isSummarySection = false;
                     isDetailsSection = true;
-                    if (debugMode && listener != null) {
+                    if (debugMode) {
                         listener.getLogger().println("\n=== Entering Details Section ===");
                     }
                     continue;
@@ -114,7 +180,7 @@ public class QuestaFormalResult implements Action {
                         if (m.find()) {
                             lintErrorCount = Integer.parseInt(m.group(1));
                             currentCategory = "Error";
-                            if (debugMode && listener != null) {
+                            if (debugMode) {
                                 listener.getLogger().println("[Summary] Found Error category with count: " + lintErrorCount);
                             }
                         }
@@ -125,7 +191,7 @@ public class QuestaFormalResult implements Action {
                         if (m.find()) {
                             lintWarningCount = Integer.parseInt(m.group(1));
                             currentCategory = "Warning";
-                            if (debugMode && listener != null) {
+                            if (debugMode) {
                                 listener.getLogger().println("Found Warning count: " + lintWarningCount);
                             }
                         }
@@ -136,7 +202,7 @@ public class QuestaFormalResult implements Action {
                         if (m.find()) {
                             lintInfoCount = Integer.parseInt(m.group(1));
                             currentCategory = "Info";
-                            if (debugMode && listener != null) {
+                            if (debugMode) {
                                 listener.getLogger().println("Found Info count: " + lintInfoCount);
                             }
                         }
@@ -162,12 +228,12 @@ public class QuestaFormalResult implements Action {
                                 CheckItem newItem = new CheckItem(checkName, checkCount, "", currentCategory);
                                 lintChecks.add(newItem);
                                 
-                                if (debugMode && listener != null) {
+                                if (debugMode) {
                                     listener.getLogger().println(String.format("[Summary] Added check item: %s (count: %d, category: %s, id: %s)",
                                         checkName, checkCount, currentCategory, newItem.getId()));
                                 }
                             } catch (NumberFormatException e) {
-                                if (debugMode && listener != null) {
+                                if (debugMode) {
                                     listener.getLogger().println("[Error] Failed to parse check count for: " + checkName);
                                 }
                             }
@@ -184,7 +250,7 @@ public class QuestaFormalResult implements Action {
                     }
                     
                     if (line.startsWith("Check:")) {
-                        if (debugMode && listener != null) {
+                        if (debugMode) {
                             listener.getLogger().println("\n[Details] Processing check: " + line);
                         }
                         
@@ -208,7 +274,7 @@ public class QuestaFormalResult implements Action {
                                 
                                 detailsBuilder.append(message).append("\n");
                                 
-                                if (debugMode && listener != null) {
+                                if (debugMode) {
                                     listener.getLogger().println("[Details] Found message: " + message);
                                 }
                                 
@@ -225,16 +291,16 @@ public class QuestaFormalResult implements Action {
                                     if (instanceLine.isEmpty() || instanceLine.startsWith("Check:") || 
                                         instanceLine.startsWith("=====") || instanceLine.startsWith("-----") ||
                                         instanceLine.startsWith("|")) {
-                    break;
+                                        break;
                                     }
                                     
-                                    if (debugMode && listener != null) {
+                                    if (debugMode) {
                                         listener.getLogger().println("[Details] Processing occurrence line: " + instanceLine);
                                     }
                                     
                                     // Parse occurrences
                                     if (instanceLine.contains(": [uninspected]") || instanceLine.startsWith(checkName + ":")) {
-                                        if (debugMode && listener != null) {
+                                        if (debugMode) {
                                             listener.getLogger().println("[Debug] Processing main occurrence line: " + instanceLine);
                                         }
                                         
@@ -265,7 +331,7 @@ public class QuestaFormalResult implements Action {
                                             
                                             while (nextLine != null && nextLine.trim().contains("more occurrence")) {
                                                 String moreOccurrenceLine = nextLine.trim();
-                                                if (debugMode && listener != null) {
+                                                if (debugMode) {
                                                     listener.getLogger().println("[Debug] Found additional occurrences line: " + moreOccurrenceLine);
                                                 }
                                                 
@@ -285,7 +351,7 @@ public class QuestaFormalResult implements Action {
                                                     }
                                                 }
                                                 
-                                                if (debugMode && listener != null) {
+                                                if (debugMode) {
                                                     listener.getLogger().println("[Debug] Found additional line numbers: " + String.join(", ", additionalLineNumbers));
                                                 }
                                                 
@@ -308,7 +374,7 @@ public class QuestaFormalResult implements Action {
                                             for (CheckItem item : lintChecks) {
                                                 if (item.getName().equals(checkName)) {
                                                     item.addOccurrence(formattedOccurrence);
-                                                    if (debugMode && listener != null) {
+                                                    if (debugMode) {
                                                         listener.getLogger().println("[Details] Added occurrence to " + checkName + ": " + formattedOccurrence);
                                                         listener.getLogger().println("[Debug] Current occurrences count for " + checkName + ": " + item.getOccurrences().size() + "/" + item.getCount());
                                                     }
@@ -332,7 +398,7 @@ public class QuestaFormalResult implements Action {
                                 for (CheckItem item : lintChecks) {
                                     if (item.getName().equals(checkName)) {
                                         item.setDetails(detailsBuilder.toString().trim());
-                                        if (debugMode && listener != null) {
+                                        if (debugMode) {
                                             listener.getLogger().println(String.format("[Details] Updated check item %s: (details: %s, occurrences: %d)",
                                                 checkName, detailsBuilder.toString().trim(), item.getOccurrences().size()));
                                             listener.getLogger().println("[Debug] Item type: " + item.getType() + ", Category: " + category);
@@ -347,7 +413,7 @@ public class QuestaFormalResult implements Action {
             }
             
             // Final debug logging
-            if (debugMode && listener != null) {
+            if (debugMode) {
                 listener.getLogger().println("\n=== Final Parsing Results ===");
                 listener.getLogger().println("Total Check Items: " + lintChecks.size());
                 
@@ -367,77 +433,11 @@ public class QuestaFormalResult implements Action {
                 listener.getLogger().println("Info: " + infos.size() + " (Total items: " + infos.stream().mapToInt(CheckItem::getCount).sum() + ")");
             }
         } catch (IOException e) {
-            if (debugMode && listener != null) {
+            if (debugMode) {
                 listener.error("Failed to read lint report: " + e.getMessage());
                 e.printStackTrace(listener.getLogger());
             }
         }
-    }
-
-    private void parseCDCReport() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(cdcReportPath), StandardCharsets.UTF_8))) {
-            // CDC report parsing logic here
-        }
-    }
-
-    private void parseLintCheckDetails(String line) {
-        // Check: 1 [Category: Error] (6) Details text here
-        Pattern pattern = Pattern.compile("Check:\\s*(\\d+)\\s*\\[Category:\\s*([^\\]]+)\\]\\s*\\((\\d+)\\)\\s*(.+)");
-        Matcher matcher = pattern.matcher(line);
-        
-        if (matcher.find()) {
-            String checkNumber = matcher.group(1);
-            String category = matcher.group(2);
-            int count = Integer.parseInt(matcher.group(3));
-            String details = matcher.group(4);
-            
-            String name = String.format("Check %s", checkNumber);
-            lintChecks.add(new CheckItem(name, count, details, category));
-            
-            // Debug logging
-            if (listener != null) {
-                listener.getLogger().println("Parsed check: " + name + " (" + count + ")");
-            }
-        }
-    }
-
-    @Override
-    public String getIconFileName() {
-        return "graph.gif";
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Questa Formal Results";
-    }
-
-    @Override
-    public String getUrlName() {
-        return "questaformal-result";
-    }
-
-    public String getLintDesign() {
-        return lintDesign;
-    }
-
-    public String getLintTimestamp() {
-        return lintTimestamp;
-    }
-
-    public double getQualityScore() {
-        return qualityScore;
-    }
-
-    public int getLintErrorCount() {
-        return lintErrorCount;
-    }
-
-    public int getLintWarningCount() {
-        return lintWarningCount;
-    }
-
-    public int getLintInfoCount() {
-        return lintInfoCount;
     }
 
     public List<CheckItem> getAllLintChecks() {
@@ -462,37 +462,44 @@ public class QuestaFormalResult implements Action {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    public Map<String, Integer> getLintResults() {
-        Map<String, Integer> results = new HashMap<>();
-        results.put("errors", lintErrorCount);
-        results.put("warnings", lintWarningCount);
-        results.put("info", lintInfoCount);
-        return results;
-    }
-
-    public double getQualityScorePercentage() {
-        return qualityScore;
-    }
-
-    public String getDebugInfo() {
-        return String.format(
-            "Design: %s, Timestamp: %s, Quality Score: %.1f, Errors: %d, Warnings: %d, Info: %d",
-            lintDesign, lintTimestamp, qualityScore, lintErrorCount, lintWarningCount, lintInfoCount
-        );
-    }
-
-    public void logToConsole(String message) {
-        if (debugMode) {
-            System.out.println("[Questa Formal Debug] " + message);
+    @Symbol("questaFormalResult")
+    @Extension
+    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        public FormValidation doCheckLintReportPath(@QueryParameter String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return FormValidation.ok("Using default path: " + DEFAULT_LINT_REPORT_PATH);
+            }
+            
+            // Check for absolute paths
+            if (value.startsWith("/") || value.matches("^[A-Za-z]:\\\\.*")) {
+                return FormValidation.warning("Absolute paths are not recommended. Consider using a path relative to the workspace.");
+            }
+            
+            return FormValidation.ok();
         }
-    }
 
-    public boolean isDebugMode() {
-        return debugMode;
-    }
+        public FormValidation doCheckCdcReportPath(@QueryParameter String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return FormValidation.ok("Using default path: " + DEFAULT_CDC_REPORT_PATH);
+            }
+            
+            // Check for absolute paths
+            if (value.startsWith("/") || value.matches("^[A-Za-z]:\\\\.*")) {
+                return FormValidation.warning("Absolute paths are not recommended. Consider using a path relative to the workspace.");
+            }
+            
+            return FormValidation.ok();
+        }
 
-    public void setDebugMode(boolean debugMode) {
-        this.debugMode = debugMode;
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Publish Questa Formal Results";
+        }
     }
 
     public static class CheckItem {

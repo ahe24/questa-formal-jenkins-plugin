@@ -1,0 +1,613 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <l:layout title="Questa Formal Analysis Results">
+        <l:side-panel>
+            <st:include page="sidepanel.jelly" it="${it.run}" optional="true" />
+        </l:side-panel>
+        <l:main-panel>
+            <h1>Questa Formal Analysis Results</h1>
+            
+            <div class="info-section">
+                <div class="info-grid">
+                    <div class="info-left">
+                        <div class="info-row">
+                            <span class="info-label">Design:</span>
+                            <span class="info-value">${it.lintDesign}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Timestamp:</span>
+                            <span class="info-value">${it.lintTimestamp}</span>
+                        </div>
+                    </div>
+                    <div class="info-right">
+                        <div class="quality-score">
+                            <div class="score-bar">
+                                <div class="score-track">
+                                    <div class="score-sections">
+                                        <div class="section poor">Poor</div>
+                                        <div class="section normal">Normal</div>
+                                        <div class="section good">Good</div>
+                                    </div>
+                                    <div class="score-value">
+                                        <div class="score-bubble">
+                                            <span class="value">${it.qualityScore}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="score-label">Quality Score</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2>Lint Results</h2>
+                <div class="results-grid">
+                    <div class="chart-card">
+                        <div id="chart-wrapper">
+                            <canvas id="lintResultsChart" width="400" height="400"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="details-section">
+                <h2>Details</h2>
+                <div class="details-content">
+                    <j:if test="${!empty(it.lintErrors)}">
+                        <div class="check-section error">
+                            <div class="section-header" onclick="toggleSection(this)">
+                                <h3>Errors (${it.lintErrorCount})</h3>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="section-content">
+                                <j:forEach var="check" items="${it.lintErrors}">
+                                    <div class="check-item">
+                                        <div class="check-header" onclick="toggleCheck(this)">
+                                            <span class="check-name">${check.name}</span>
+                                            <span class="check-meta">
+                                                <span class="check-category">Error</span>
+                                                <span class="check-count">${check.count}</span>
+                                                <span class="toggle-icon">▼</span>
+                                            </span>
+                                        </div>
+                                        <div class="check-details">
+                                            <div class="check-description">${check.details}</div>
+                                            <j:if test="${!empty(check.occurrences)}">
+                                                <ul class="occurrence-list">
+                                                    <j:forEach var="occurrence" items="${check.occurrences}">
+                                                        <li class="occurrence-item">${occurrence}</li>
+                                                    </j:forEach>
+                                                </ul>
+                                            </j:if>
+                                        </div>
+                                    </div>
+                                </j:forEach>
+                            </div>
+                        </div>
+                    </j:if>
+                    
+                    <j:if test="${!empty(it.lintWarnings)}">
+                        <div class="check-section warning">
+                            <div class="section-header" onclick="toggleSection(this)">
+                                <h3>Warnings (${it.lintWarningCount})</h3>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="section-content">
+                                <j:forEach var="check" items="${it.lintWarnings}">
+                                    <div class="check-item">
+                                        <div class="check-header" onclick="toggleCheck(this)">
+                                            <span class="check-name">${check.name}</span>
+                                            <span class="check-meta">
+                                                <span class="check-category">Warning</span>
+                                                <span class="check-count">${check.count}</span>
+                                                <span class="toggle-icon">▼</span>
+                                            </span>
+                                        </div>
+                                        <div class="check-details">
+                                            <div class="check-description">${check.details}</div>
+                                            <j:if test="${!empty(check.occurrences)}">
+                                                <ul class="occurrence-list">
+                                                    <j:forEach var="occurrence" items="${check.occurrences}">
+                                                        <li class="occurrence-item">${occurrence}</li>
+                                                    </j:forEach>
+                                                </ul>
+                                            </j:if>
+                                        </div>
+                                    </div>
+                                </j:forEach>
+                            </div>
+                        </div>
+                    </j:if>
+                    
+                    <j:if test="${!empty(it.lintInfo)}">
+                        <div class="check-section info">
+                            <div class="section-header" onclick="toggleSection(this)">
+                                <h3>Info (${it.lintInfoCount})</h3>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="section-content">
+                                <j:forEach var="check" items="${it.lintInfo}">
+                                    <div class="check-item">
+                                        <div class="check-header" onclick="toggleCheck(this)">
+                                            <span class="check-name">${check.name}</span>
+                                            <span class="check-meta">
+                                                <span class="check-category">Info</span>
+                                                <span class="check-count">${check.count}</span>
+                                                <span class="toggle-icon">▼</span>
+                                            </span>
+                                        </div>
+                                        <div class="check-details">
+                                            <div class="check-description">${check.details}</div>
+                                            <j:if test="${!empty(check.occurrences)}">
+                                                <ul class="occurrence-list">
+                                                    <j:forEach var="occurrence" items="${check.occurrences}">
+                                                        <li class="occurrence-item">${occurrence}</li>
+                                                    </j:forEach>
+                                                </ul>
+                                            </j:if>
+                                        </div>
+                                    </div>
+                                </j:forEach>
+                            </div>
+                        </div>
+                    </j:if>
+                </div>
+            </div>
+            
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script><![CDATA[
+                // Quality Score 애니메이션
+                function animateQualityScore() {
+                    const score = ${it.qualityScore};
+                    const duration = 3000;
+                    const scoreValue = document.querySelector('.score-value .value');
+                    const scoreBubble = document.querySelector('.score-bubble');
+                    
+                    let startValue = 0;
+                    const startTime = performance.now();
+                    
+                    function updateScoreClass(value) {
+                        scoreBubble.classList.remove('poor', 'normal', 'good');
+                        if (value <= 50) {
+                            scoreBubble.classList.add('poor');
+                        } else if (value <= 80) {
+                            scoreBubble.classList.add('normal');
+                        } else {
+                            scoreBubble.classList.add('good');
+                        }
+                    }
+                    
+                    function updateScore(currentTime) {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // easeOutExpo 애니메이션
+                        const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                        const currentValue = easeProgress * score;
+                        
+                        // 소수점 한 자리까지 표시
+                        scoreValue.textContent = currentValue.toFixed(1) + '%';
+                        scoreBubble.style.left = currentValue + '%';
+                        
+                        // 구간에 따른 색상 변경
+                        updateScoreClass(currentValue);
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(updateScore);
+                        }
+                    }
+                    
+                    // 초기 색상 설정
+                    updateScoreClass(score);
+                    requestAnimationFrame(updateScore);
+                }
+                
+                // Lint Results 차트 애니메이션
+                document.addEventListener('DOMContentLoaded', function() {
+                    const ctx = document.getElementById('lintResultsChart').getContext('2d');
+                    
+                    // 데이터 변환 및 검증
+                    const errorCount = Math.max(0, parseInt('${it.lintErrorCount}') || 0);
+                    const warningCount = Math.max(0, parseInt('${it.lintWarningCount}') || 0);
+                    const infoCount = Math.max(0, parseInt('${it.lintInfoCount}') || 0);
+                    const totalCount = errorCount + warningCount + infoCount;
+                    
+                    // 디버깅을 위한 데이터 출력
+                    console.log('Chart data:', {
+                        errorCount,
+                        warningCount,
+                        infoCount,
+                        totalCount,
+                        rawError: '${it.lintErrorCount}',
+                        rawWarning: '${it.lintWarningCount}',
+                        rawInfo: '${it.lintInfoCount}'
+                    });
+                    
+                    const chartConfig = {
+                        type: 'bar',
+                        data: {
+                            labels: ['Errors', 'Warnings', 'Info'],
+                            datasets: [{
+                                data: [errorCount, warningCount, infoCount],
+                                backgroundColor: ['#dc3545', '#ffc107', '#17a2b8'],
+                                borderWidth: 0,
+                                borderRadius: 4,
+                                barThickness: 30,
+                                maxBarThickness: 35
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    left: 20,
+                                    right: 20,
+                                    top: 20,
+                                    bottom: 20
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        display: true,
+                                        color: '#f0f0f0'
+                                    },
+                                    ticks: {
+                                        font: {
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                y: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        font: {
+                                            size: 13,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    titleColor: 'white',
+                                    bodyColor: 'white',
+                                    padding: 10,
+                                    displayColors: false,
+                                    callbacks: {
+                                        title: function(tooltipItems) {
+                                            return tooltipItems[0].label;
+                                        },
+                                        label: function(tooltipItem) {
+                                            return 'Count: ' + tooltipItem.formattedValue;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    
+                    console.log('Creating chart with config:', chartConfig);
+                    const chart = new Chart(ctx, chartConfig);
+                    console.log('Chart instance created:', chart);
+                    
+                    // Quality Score 애니메이션 시작
+                    animateQualityScore();
+                });
+                
+                // Details 섹션 토글
+                function toggleSection(header) {
+                    const section = header.parentElement;
+                    const content = section.querySelector('.section-content');
+                    const icon = header.querySelector('.toggle-icon');
+                    
+                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                    icon.textContent = content.style.display === 'none' ? '▼' : '▲';
+                }
+                
+                function toggleCheck(header) {
+                    const item = header.parentElement;
+                    const details = item.querySelector('.check-details');
+                    const icon = header.querySelector('.toggle-icon');
+                    
+                    details.style.display = details.style.display === 'none' ? 'block' : 'none';
+                    icon.textContent = details.style.display === 'none' ? '▼' : '▲';
+                }
+            ]]></script>
+            
+            <style><![CDATA[
+                .info-section {
+                    margin: 20px 0;
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 2fr;
+                    gap: 40px;
+                }
+                
+                .info-row {
+                    margin: 10px 0;
+                }
+                
+                .info-label {
+                    font-weight: bold;
+                    color: #666;
+                    margin-right: 10px;
+                }
+                
+                .quality-score {
+                    text-align: center;
+                }
+                
+                .score-bar {
+                    margin: 20px 0;
+                }
+                
+                .score-track {
+                    height: 30px;
+                    background: #f0f0f0;
+                    border-radius: 15px;
+                    position: relative;
+                    overflow: visible;
+                    margin-top: 40px;
+                }
+                
+                .score-sections {
+                    display: flex;
+                    height: 100%;
+                    position: relative;
+                    z-index: 1;
+                }
+                
+                .section {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    font-size: 12px;
+                }
+                
+                .section.poor {
+                    flex: 5;  /* 0-50% */
+                    background: #dc3545;
+                    border-radius: 15px 0 0 15px;
+                }
+                
+                .section.normal {
+                    flex: 3;  /* 50-80% */
+                    background: #ffc107;
+                }
+                
+                .section.good {
+                    flex: 2;  /* 80-100% */
+                    background: #28a745;
+                    border-radius: 0 15px 15px 0;
+                }
+                
+                .score-value {
+                    position: absolute;
+                    top: -40px;
+                    left: 0;
+                    width: 100%;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    z-index: 2;
+                }
+                
+                .score-bubble {
+                    position: absolute;
+                    left: 0;
+                    padding: 6px 12px;
+                    border-radius: 15px;
+                    transform: translateX(-50%);
+                    transition: left 3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+                
+                .score-bubble.poor {
+                    background: #dc3545;
+                }
+                
+                .score-bubble.normal {
+                    background: #ffc107;
+                }
+                
+                .score-bubble.good {
+                    background: #28a745;
+                }
+                
+                .score-bubble::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 0;
+                    height: 0;
+                    border-left: 6px solid transparent;
+                    border-right: 6px solid transparent;
+                    transition: border-top-color 0.3s ease;
+                }
+                
+                .score-bubble.poor::after {
+                    border-top-color: #dc3545;
+                }
+                
+                .score-bubble.normal::after {
+                    border-top-color: #ffc107;
+                }
+                
+                .score-bubble.good::after {
+                    border-top-color: #28a745;
+                }
+                
+                .score-bubble .value {
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: white;
+                    white-space: nowrap;
+                    display: block;
+                    text-align: center;
+                }
+                
+                .results-section {
+                    margin: 40px 0;
+                }
+                
+                .results-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 20px;
+                    margin: 20px 0;
+                }
+                
+                .chart-card {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    height: 400px;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
+                
+                #chart-wrapper {
+                    flex: 1;
+                    position: relative;
+                    min-height: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+                
+                canvas#lintResultsChart {
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-width: none !important;
+                    max-height: none !important;
+                }
+                
+                .details-section {
+                    margin: 40px 0;
+                }
+                
+                .check-section {
+                    margin: 20px 0;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                }
+                
+                .section-header {
+                    padding: 15px 20px;
+                    background: #f8f9fa;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .section-header h3 {
+                    margin: 0;
+                }
+                
+                .section-content {
+                    padding: 20px;
+                }
+                
+                .check-item {
+                    margin: 10px 0;
+                }
+                
+                .check-header {
+                    padding: 10px;
+                    background: #f8f9fa;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .check-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                
+                .check-category {
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 12px;
+                    font-weight: bold;
+                }
+                
+                .error .check-category { background: #dc3545; color: white; }
+                .warning .check-category { background: #ffc107; color: black; }
+                .info .check-category { background: #17a2b8; color: white; }
+                
+                .check-count {
+                    font-weight: bold;
+                }
+                
+                .check-details {
+                    display: none;
+                    padding: 15px;
+                    background: white;
+                    border: 1px solid #eee;
+                    border-radius: 4px;
+                    margin-top: 5px;
+                }
+                
+                .check-description {
+                    margin-bottom: 10px;
+                    color: #666;
+                }
+                
+                .occurrence-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+                
+                .occurrence-item {
+                    padding: 5px 0;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .occurrence-item:last-child {
+                    border-bottom: none;
+                }
+                
+                .toggle-icon {
+                    font-size: 12px;
+                    color: #666;
+                }
+            ]]></style>
+        </l:main-panel>
+    </l:layout>
+</j:jelly> 
