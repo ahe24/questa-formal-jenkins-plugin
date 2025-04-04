@@ -52,20 +52,20 @@
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3>Error Details</h3>
-                        <div id="error-chart-wrapper">
+                        <h3>Found Issues - Errors</h3>
+                        <div class="chart-container">
                             <canvas id="errorDetailsChart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3>Warning Details</h3>
-                        <div id="warning-chart-wrapper">
+                        <h3>Found Issues - Warnings</h3>
+                        <div class="chart-container">
                             <canvas id="warningDetailsChart"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3>Info Details</h3>
-                        <div id="info-chart-wrapper">
+                        <h3>Found Issues - Info</h3>
+                        <div class="chart-container">
                             <canvas id="infoDetailsChart"></canvas>
                         </div>
                     </div>
