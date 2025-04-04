@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 public class QuestaFormalResult extends Recorder implements SimpleBuildStep {
     private static final String DEFAULT_LINT_REPORT_PATH = "Lint_Results/lint.rpt";
-    private static final String DEFAULT_CDC_REPORT_PATH = "CDC_result/cdc.rpt";
+    public static final String DEFAULT_CDC_REPORT_PATH = "CDC_result/cdc.rpt";
     
     private final String lintReportPath;
     private final String cdcReportPath;
@@ -106,7 +106,50 @@ public class QuestaFormalResult extends Recorder implements SimpleBuildStep {
         }
     }
 
-    private void parseLintReport(FilePath reportFile, TaskListener listener) throws IOException, InterruptedException {
+    private String sanitizeFilePath(String filePath, TaskListener listener) {
+        if (filePath == null) return "";
+        
+        if (debugMode) {
+            listener.getLogger().println("[Debug] Sanitizing file path:");
+            listener.getLogger().println("[Debug] Original path: " + filePath);
+        }
+        
+        // 워크스페이스 경로 패턴 매칭 및 치환
+        String sanitized = filePath;
+        
+        // Jenkins 워크스페이스 경로 제거
+        Pattern pattern = Pattern.compile("/var/lib/jenkins/workspace/[^/]+/");
+        Matcher matcher = pattern.matcher(sanitized);
+        
+        // 테스트 환경을 위한 처리
+        if (!matcher.find()) {
+            sanitized = "PROJ_ROOT/" + new File(sanitized).getName();
+            if (debugMode) {
+                listener.getLogger().println("[Debug] No workspace path found, using file name only");
+            }
+        } else {
+            String matchedPath = matcher.group();
+            sanitized = matcher.replaceAll("PROJ_ROOT/");
+            if (debugMode) {
+                listener.getLogger().println("[Debug] Found workspace path match: " + matchedPath);
+            }
+        }
+        
+        if (debugMode) {
+            listener.getLogger().println("[Debug] After sanitization: " + sanitized);
+            if (sanitized.equals(filePath)) {
+                listener.getLogger().println("[Warning] Path was not modified by sanitization");
+                listener.getLogger().println("[Debug] Path analysis:");
+                listener.getLogger().println("  - Original path: " + filePath);
+                listener.getLogger().println("  - Contains workspace path: " + filePath.contains("/var/lib/jenkins/workspace/"));
+                listener.getLogger().println("  - Path segments: " + String.join(", ", filePath.split("/")));
+            }
+        }
+        
+        return sanitized;
+    }
+
+    protected void parseLintReport(FilePath reportFile, TaskListener listener) throws IOException, InterruptedException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(reportFile.read(), StandardCharsets.UTF_8))) {
             String line;
             boolean isSummarySection = false;
@@ -298,7 +341,6 @@ public class QuestaFormalResult extends Recorder implements SimpleBuildStep {
                                         listener.getLogger().println("[Details] Processing occurrence line: " + instanceLine);
                                     }
                                     
-                                    // Parse occurrences
                                     if (instanceLine.contains(": [uninspected]") || instanceLine.startsWith(checkName + ":")) {
                                         if (debugMode) {
                                             listener.getLogger().println("[Debug] Processing main occurrence line: " + instanceLine);
@@ -311,84 +353,106 @@ public class QuestaFormalResult extends Recorder implements SimpleBuildStep {
                                             occurrence = instanceLine.substring(instanceLine.indexOf(":") + 1).trim();
                                         }
                                         
-                                        String occurrenceFile = "";
-                                        String occurrenceLine = "";
-                                        
                                         int fileIndex = occurrence.indexOf("File '");
                                         int lineIndex = occurrence.indexOf("Line '");
                                         
                                         if (fileIndex > 0 && lineIndex > 0) {
-                                            occurrenceFile = occurrence.substring(fileIndex + 6, occurrence.indexOf("'", fileIndex + 6));
-                                            occurrenceLine = occurrence.substring(lineIndex + 6, occurrence.indexOf("'", lineIndex + 6));
+                                            // 안전하게 문자열 인덱스 확인
+                                            int fileEndIndex = occurrence.indexOf("'", fileIndex + 6);
+                                            int lineEndIndex = occurrence.indexOf("'", lineIndex + 6);
                                             
-                                            String specificDetails = occurrence.substring(0, fileIndex).trim();
-                                            lastSpecificDetails = specificDetails;
-                                            lastOccurrenceFile = occurrenceFile;
-                                            
-                                            // 다음 라인이 "more occurrence" 라인인지 확인
-                                            String nextLine = reader.readLine();
-                                            List<String> additionalLineNumbers = new ArrayList<>();
-                                            
-                                            while (nextLine != null && nextLine.trim().contains("more occurrence")) {
-                                                String moreOccurrenceLine = nextLine.trim();
+                                            if (fileEndIndex > 0 && lineEndIndex > 0) {
+                                                // 파일 경로와 라인 번호 추출
+                                                String originalPath = occurrence.substring(fileIndex + 6, fileEndIndex);
                                                 if (debugMode) {
-                                                    listener.getLogger().println("[Debug] Found additional occurrences line: " + moreOccurrenceLine);
+                                                    listener.getLogger().println("[Debug] Extracted file path: " + originalPath);
                                                 }
                                                 
-                                                // Extract line numbers from various formats
-                                                Pattern linePattern = Pattern.compile("line\\s+(\\d+)");
-                                                Matcher lineMatcher = linePattern.matcher(moreOccurrenceLine);
-                                                
-                                                while (lineMatcher.find()) {
-                                                    additionalLineNumbers.add(lineMatcher.group(1));
-                                                }
-                                                
-                                                if (additionalLineNumbers.isEmpty()) {
-                                                    Pattern numPattern = Pattern.compile("\\b(\\d+)\\b");
-                                                    Matcher numMatcher = numPattern.matcher(moreOccurrenceLine);
-                                                    while (numMatcher.find()) {
-                                                        additionalLineNumbers.add(numMatcher.group(1));
-                                                    }
-                                                }
-                                                
+                                                String sanitizedPath = sanitizeFilePath(originalPath, listener);
                                                 if (debugMode) {
-                                                    listener.getLogger().println("[Debug] Found additional line numbers: " + String.join(", ", additionalLineNumbers));
+                                                    listener.getLogger().println("[Debug] Sanitized path: " + sanitizedPath);
                                                 }
                                                 
-                                                nextLine = reader.readLine();
-                                            }
-                                            
-                                            // 모든 라인 번호를 하나의 발생 항목으로 결합
-                                            List<String> allLineNumbers = new ArrayList<>();
-                                            allLineNumbers.add(occurrenceLine);
-                                            allLineNumbers.addAll(additionalLineNumbers);
-                                            
-                                            String combinedLineNumbers = String.join(", ", allLineNumbers.stream()
-                                                .map(num -> "'" + num + "'")
-                                                .collect(java.util.stream.Collectors.toList()));
-                                            
-                                            String formattedOccurrence = String.format("%s (File: %s, Line: %s)",
-                                                specificDetails.trim(), occurrenceFile, combinedLineNumbers);
-
-                                            // Update check item
-                                            for (CheckItem item : lintChecks) {
-                                                if (item.getName().equals(checkName)) {
-                                                    item.addOccurrence(formattedOccurrence);
+                                                // 상세 정보와 라인 번호 추출
+                                                String specificDetails = occurrence.substring(0, fileIndex).trim();
+                                                String occurrenceLine = occurrence.substring(lineIndex + 6, lineEndIndex);
+                                                
+                                                // 변수 저장
+                                                lastSpecificDetails = specificDetails;
+                                                lastOccurrenceFile = sanitizedPath;
+                                                
+                                                // 다음 라인이 "more occurrence" 라인인지 확인
+                                                String nextLine = reader.readLine();
+                                                List<String> additionalLineNumbers = new ArrayList<>();
+                                                
+                                                while (nextLine != null && nextLine.trim().contains("more occurrence")) {
+                                                    String moreOccurrenceLine = nextLine.trim();
                                                     if (debugMode) {
-                                                        listener.getLogger().println("[Details] Added occurrence to " + checkName + ": " + formattedOccurrence);
-                                                        listener.getLogger().println("[Debug] Current occurrences count for " + checkName + ": " + item.getOccurrences().size() + "/" + item.getCount());
+                                                        listener.getLogger().println("[Debug] Found additional occurrences line: " + moreOccurrenceLine);
                                                     }
-                                                    break;
+                                                    
+                                                    // Extract line numbers from various formats
+                                                    Pattern linePattern = Pattern.compile("line\\s+(\\d+)");
+                                                    Matcher lineMatcher = linePattern.matcher(moreOccurrenceLine);
+                                                    
+                                                    while (lineMatcher.find()) {
+                                                        additionalLineNumbers.add(lineMatcher.group(1));
+                                                    }
+                                                    
+                                                    if (additionalLineNumbers.isEmpty()) {
+                                                        Pattern numPattern = Pattern.compile("\\b(\\d+)\\b");
+                                                        Matcher numMatcher = numPattern.matcher(moreOccurrenceLine);
+                                                        while (numMatcher.find()) {
+                                                            additionalLineNumbers.add(numMatcher.group(1));
+                                                        }
+                                                    }
+                                                    
+                                                    if (debugMode) {
+                                                        listener.getLogger().println("[Debug] Found additional line numbers: " + String.join(", ", additionalLineNumbers));
+                                                    }
+                                                    
+                                                    nextLine = reader.readLine();
                                                 }
-                                            }
-                                            
-                                            // If we read past the additional occurrences, we need to go back one line
-                                            if (nextLine != null && !nextLine.trim().isEmpty() && 
-                                                !nextLine.trim().startsWith("Check:") && 
-                                                !nextLine.trim().startsWith("=====") && 
-                                                !nextLine.trim().startsWith("-----") &&
-                                                !nextLine.trim().startsWith("|")) {
-                                                instanceLine = nextLine;
+                                                
+                                                // 모든 라인 번호를 하나의 발생 항목으로 결합
+                                                List<String> allLineNumbers = new ArrayList<>();
+                                                allLineNumbers.add(occurrenceLine);
+                                                allLineNumbers.addAll(additionalLineNumbers);
+                                                
+                                                String combinedLineNumbers = String.join(", ", allLineNumbers.stream()
+                                                    .map(num -> "'" + num + "'")
+                                                    .collect(java.util.stream.Collectors.toList()));
+                                                
+                                                // 새로운 포맷으로 occurrence 문자열 생성
+                                                String formattedOccurrence = String.format("%s (File: %s, Line: %s)",
+                                                    specificDetails.trim(), 
+                                                    sanitizedPath.replace("/var/lib/jenkins/workspace/test1/", "PROJ_ROOT/"),
+                                                    combinedLineNumbers);
+                                                
+                                                if (debugMode) {
+                                                    listener.getLogger().println("[Debug] Formatted occurrence: " + formattedOccurrence);
+                                                }
+
+                                                // Update check item
+                                                for (CheckItem item : lintChecks) {
+                                                    if (item.getName().equals(checkName)) {
+                                                        item.addOccurrence(formattedOccurrence);
+                                                        if (debugMode) {
+                                                            listener.getLogger().println("[Details] Added occurrence to " + checkName + ": " + formattedOccurrence);
+                                                            listener.getLogger().println("[Debug] Current occurrences count for " + checkName + ": " + item.getOccurrences().size() + "/" + item.getCount());
+                                                        }
+                                                        break;
+                                                    }
+                                                }
+                                                
+                                                // If we read past the additional occurrences, we need to go back one line
+                                                if (nextLine != null && !nextLine.trim().isEmpty() && 
+                                                    !nextLine.trim().startsWith("Check:") && 
+                                                    !nextLine.trim().startsWith("=====") && 
+                                                    !nextLine.trim().startsWith("-----") &&
+                                                    !nextLine.trim().startsWith("|")) {
+                                                    instanceLine = nextLine;
+                                                }
                                             }
                                         }
                                     }
@@ -540,7 +604,15 @@ public class QuestaFormalResult extends Recorder implements SimpleBuildStep {
         }
 
         public List<String> getOccurrences() {
-            return occurrences;
+            if (occurrences == null) {
+                return new ArrayList<>();
+            }
+            List<String> sanitizedOccurrences = new ArrayList<>();
+            for (String occurrence : occurrences) {
+                String sanitized = occurrence.replaceAll("/var/lib/jenkins/workspace/[^/]+/", "PROJ_ROOT/");
+                sanitizedOccurrences.add(sanitized);
+            }
+            return sanitizedOccurrences;
         }
 
         public String getType() {
@@ -552,7 +624,10 @@ public class QuestaFormalResult extends Recorder implements SimpleBuildStep {
         }
 
         public void addOccurrence(String occurrence) {
-            this.occurrences.add(occurrence);
+            if (occurrences == null) {
+                occurrences = new ArrayList<>();
+            }
+            occurrences.add(occurrence);
         }
     }
 }
