@@ -87,7 +87,7 @@
                                         <div class="check-header" onclick="toggleCheck(this)">
                                             <span class="check-name">${check.name}</span>
                                             <span class="check-meta">
-                                                <span class="check-category">Error</span>
+                                                <span class="check-category error">Error</span>
                                                 <span class="check-count">${check.count}</span>
                                                 <span class="toggle-icon">▼</span>
                                             </span>
@@ -120,7 +120,7 @@
                                         <div class="check-header" onclick="toggleCheck(this)">
                                             <span class="check-name">${check.name}</span>
                                             <span class="check-meta">
-                                                <span class="check-category">Warning</span>
+                                                <span class="check-category warning">Warning</span>
                                                 <span class="check-count">${check.count}</span>
                                                 <span class="toggle-icon">▼</span>
                                             </span>
@@ -153,7 +153,7 @@
                                         <div class="check-header" onclick="toggleCheck(this)">
                                             <span class="check-name">${check.name}</span>
                                             <span class="check-meta">
-                                                <span class="check-category">Info</span>
+                                                <span class="check-category info">Info</span>
                                                 <span class="check-count">${check.count}</span>
                                                 <span class="toggle-icon">▼</span>
                                             </span>
@@ -851,22 +851,46 @@
                 .check-meta {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    min-width: 120px;  /* 충분한 공간 확보 */
+                    justify-content: flex-end;
                 }
                 
                 .check-category {
-                    padding: 2px 6px;
-                    border-radius: 3px;
-                    font-size: 12px;
-                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                    margin-right: 10px;
+                    min-width: 60px;  /* 카테고리 영역 고정 */
                 }
                 
-                .error .check-category { background: #dc3545; color: white; }
-                .warning .check-category { background: #ffc107; color: black; }
-                .info .check-category { background: #17a2b8; color: white; }
-                
+                /* 카테고리 아이콘 스타일 */
+                .check-category::before {
+                    content: '';
+                    display: inline-block;
+                    width: 16px;
+                    height: 16px;
+                    margin-right: 5px;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: contain;
+                    flex-shrink: 0;  /* 아이콘 크기 고정 */
+                }
+
+                .check-category.error::before {
+                    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23dc3545"><circle cx="12" cy="12" r="10"/><path fill="white" d="M13 17h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>');
+                }
+
+                .check-category.warning::before {
+                    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffc107"><path d="M12 2L1 21h22L12 2zm0 3.45l8.4 14.55H3.6L12 5.45z"/><path d="M11 16h2v2h-2zm0-7h2v5h-2z"/></svg>');
+                }
+
+                .check-category.info::before {
+                    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%230dcaf0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>');
+                }
+
                 .check-count {
-                    font-weight: bold;
+                    min-width: 40px;  /* 숫자 영역 고정 */
+                    text-align: right;
+                    margin-right: 10px;
                 }
                 
                 .check-details {
@@ -899,8 +923,7 @@
                 }
                 
                 .toggle-icon {
-                    font-size: 12px;
-                    color: #666;
+                    flex-shrink: 0;  /* 화살표 크기 고정 */
                 }
 
                 /* 반응형 디자인 */
