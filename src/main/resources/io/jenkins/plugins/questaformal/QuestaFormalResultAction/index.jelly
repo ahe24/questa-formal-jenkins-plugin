@@ -328,6 +328,44 @@
                 document.addEventListener('DOMContentLoaded', function() {
                     if (!checkChartJsLoaded()) return;
 
+                    // 토글 함수 추가
+                    window.toggleSection = function(element) {
+                        const content = element.nextElementSibling;
+                        const icon = element.querySelector('.toggle-icon');
+                        
+                        if (content.style.display === 'none' || !content.style.display) {
+                            content.style.display = 'block';
+                            icon.textContent = '▼';
+                        } else {
+                            content.style.display = 'none';
+                            icon.textContent = '▶';
+                        }
+                    };
+
+                    window.toggleCheck = function(element) {
+                        const details = element.nextElementSibling;
+                        const icon = element.querySelector('.toggle-icon');
+                        
+                        if (details.style.display === 'none' || !details.style.display) {
+                            details.style.display = 'block';
+                            icon.textContent = '▼';
+                        } else {
+                            details.style.display = 'none';
+                            icon.textContent = '▶';
+                        }
+                    };
+
+                    // 초기 상태 설정
+                    document.querySelectorAll('.section-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    document.querySelectorAll('.check-details').forEach(details => {
+                        details.style.display = 'none';
+                    });
+                    document.querySelectorAll('.toggle-icon').forEach(icon => {
+                        icon.textContent = '▶';
+                    });
+
                     // 차트 생성 전 컨테이너 크기 설정을 위한 지연
                     setTimeout(() => {
                         try {

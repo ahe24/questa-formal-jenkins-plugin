@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import hudson.model.TaskListener;
+import static io.jenkins.plugins.questaformal.QuestaFormalResult.DEFAULT_CDC_REPORT_PATH;
+import java.io.PrintWriter;
 
 public class QuestaFormalResultTest {
     private static final String DEFAULT_CDC_REPORT_PATH = "CDC_result/cdc.rpt";
@@ -122,5 +125,160 @@ public class QuestaFormalResultTest {
             }
         }
         assertTrue("Should find assign_width_underflow check", foundCheck);
+    }
+
+    @Test
+    public void testFilePathSanitization() throws Exception {
+        // 테스트 파일 경로 설정
+        String testLintPath = "Lint_Results/lint.rpt";
+        FilePath workspace = new FilePath(new File("."));
+        FilePath reportFile = workspace.child(testLintPath);
+        
+        // QuestaFormalResult 인스턴스 생성
+        QuestaFormalResult result = new QuestaFormalResult(testLintPath, "CDC_result/cdc.rpt");
+        result.setDebugMode(true);  // 디버그 모드 활성화
+        
+        // TaskListener 목업 생성
+        TaskListener listener = new TaskListener() {
+            private final PrintStream logger = System.out;
+            private final PrintWriter writer = new PrintWriter(logger);
+            
+            @Override
+            public PrintWriter error(String msg) {
+                logger.println("ERROR: " + msg);
+                return writer;
+            }
+            
+            @Override
+            public PrintWriter error(String format, Object... args) {
+                logger.printf("ERROR: " + format + "%n", args);
+                return writer;
+            }
+            
+            @Override
+            public PrintStream getLogger() {
+                return logger;
+            }
+        };
+        
+        try {
+            // 파일 처리 테스트 - Run 객체 없이 직접 파싱
+            reportFile = workspace.child(testLintPath);
+            result.parseLintReport(reportFile, listener);
+            
+            // QuestaFormalResultAction 생성 및 검증
+            QuestaFormalResultAction action = new QuestaFormalResultAction(
+                "test_design", "test_timestamp", 98.7,
+                result.getLintErrors().size(),
+                result.getLintWarnings().size(),
+                result.getLintInfo().size(),
+                result.getAllLintChecks(),
+                true
+            );
+            
+            // index.jelly에서 사용되는 메소드들을 통해 값 검증
+            List<QuestaFormalResult.CheckItem> allChecks = action.getAllLintChecks();
+            assertFalse("Should have found some checks", allChecks.isEmpty());
+            
+            // 각 체크 항목의 발생 내용 검증
+            for (QuestaFormalResult.CheckItem check : allChecks) {
+                System.out.println("\nCheck: " + check.getName());
+                System.out.println("Type: " + check.getType());
+                System.out.println("Count: " + check.getCount());
+                System.out.println("Details: " + check.getDetails());
+                
+                // index.jelly에서 사용되는 getOccurrences() 메소드를 통해 발생 항목 검증
+                List<String> occurrences = check.getOccurrences();
+                assertNotNull("Occurrences should not be null", occurrences);
+                
+                for (String occurrence : occurrences) {
+                    System.out.println("  Occurrence: " + occurrence);
+                    
+                    // 워크스페이스 경로가 제거되었는지 확인
+                    assertFalse("Workspace path should be removed from occurrence", 
+                        occurrence.contains("/var/lib/jenkins/workspace/"));
+                    
+                    // PROJ_ROOT로 대체되었는지 확인
+                    if (occurrence.contains("File:")) {
+                        assertTrue("Path should contain PROJ_ROOT in occurrence", 
+                            occurrence.contains("PROJ_ROOT/"));
+                            
+                            // 파일 경로 형식 검증
+                            assertTrue("Occurrence should have proper file path format",
+                                occurrence.matches(".*\\(File: PROJ_ROOT/.*\\).*"));
+                    }
+                    
+                    // 라인 번호 형식 검증
+                    if (occurrence.contains("Line:")) {
+                        assertTrue("Occurrence should have proper line number format",
+                            occurrence.matches(".*Line: '[0-9]+'.*"));
+                    }
+                }
+            }
+            
+            // index.jelly에서 사용되는 변수들이 올바르게 설정되었는지 검증
+            assertNotNull("Design name should not be null", action.getLintDesign());
+            assertNotNull("Timestamp should not be null", action.getLintTimestamp());
+            assertTrue("Quality score should be >= 0", action.getQualityScore() >= 0);
+            
+            // 각 카테고리의 체크 항목이 존재하는지 확인
+            List<QuestaFormalResult.CheckItem> errors = action.getLintErrors();
+            List<QuestaFormalResult.CheckItem> warnings = action.getLintWarnings();
+            List<QuestaFormalResult.CheckItem> infos = action.getLintInfo();
+            
+            assertFalse("Should have some errors", errors.isEmpty());
+            assertFalse("Should have some warnings", warnings.isEmpty());
+            assertFalse("Should have some info items", infos.isEmpty());
+            
+            // 각 카테고리의 체크 항목에서 파일 경로 치환 검증
+            verifyFilePathSanitization(errors, "errors");
+            verifyFilePathSanitization(warnings, "warnings");
+            verifyFilePathSanitization(infos, "info");
+            
+        } catch (Exception e) {
+            System.err.println("Error during test: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    private void verifyFilePathSanitization(List<QuestaFormalResult.CheckItem> checks, String category) {
+        System.out.println("\nVerifying file path sanitization for " + category + ":");
+        
+        for (QuestaFormalResult.CheckItem check : checks) {
+            System.out.println("\nCheck: " + check.getName());
+            System.out.println("Type: " + check.getType());
+            
+            // 체크 항목의 상세 내용에서 파일 경로 검증
+            String details = check.getDetails();
+            if (details != null && details.contains("File:")) {
+                assertFalse("Workspace path should be removed from details in " + category,
+                    details.contains("/var/lib/jenkins/workspace/"));
+                assertTrue("Details should contain PROJ_ROOT in " + category,
+                    details.contains("PROJ_ROOT/"));
+            }
+            
+            // 발생 항목에서 파일 경로 검증
+            List<String> occurrences = check.getOccurrences();
+            assertNotNull("Occurrences should not be null for " + category, occurrences);
+            
+            for (String occurrence : occurrences) {
+                System.out.println("  Occurrence: " + occurrence);
+                
+                // 워크스페이스 경로가 제거되었는지 확인
+                assertFalse("Workspace path should be removed from occurrence in " + category, 
+                    occurrence.contains("/var/lib/jenkins/workspace/"));
+                
+                // PROJ_ROOT로 대체되었는지 확인
+                if (occurrence.contains("File:")) {
+                    assertTrue("Path should contain PROJ_ROOT in occurrence in " + category, 
+                        occurrence.contains("PROJ_ROOT/"));
+                        
+                    // 파일 경로 형식 검증
+                    assertTrue("Occurrence should have proper file path format in " + category,
+                        occurrence.matches(".*\\(File: PROJ_ROOT/.*\\).*"));
+                }
+            }
+        }
     }
 }
