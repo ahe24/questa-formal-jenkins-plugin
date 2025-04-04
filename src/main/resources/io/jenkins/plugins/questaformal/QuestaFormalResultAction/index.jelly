@@ -770,34 +770,70 @@
                 }
                 
                 .check-section {
-                    margin: 20px 0;
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    overflow: hidden;
+                    margin-bottom: 20px;
+                }
+                
+                /* 기존 기호 제거를 위한 스타일 */
+                .check-section.error::before,
+                .check-section.warning::before,
+                .check-section.info::before {
+                    display: none !important;
                 }
                 
                 .section-header {
-                    padding: 15px 20px;
-                    background: #f8f9fa;
-                    cursor: pointer;
+                    position: relative;
+                    padding-left: 30px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    cursor: pointer;
+                    background: #e9ecef;
+                    padding: 20px 25px 20px 50px;
+                    border-radius: 6px;
+                    margin-bottom: 10px;
                 }
-                
+
                 .section-header h3 {
                     margin: 0;
+                    line-height: 28px;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #2c3e50;
                 }
-                
-                .section-content {
-                    padding: 20px;
+
+                .section-header .toggle-icon {
+                    font-size: 16px;
+                    color: #495057;
                 }
-                
-                .check-item {
-                    margin: 10px 0;
+
+                /* 아이콘 스타일 */
+                .error .section-header::before,
+                .warning .section-header::before,
+                .info .section-header::before {
+                    content: '' !important;
+                    position: absolute;
+                    left: 20px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 24px;
+                    height: 24px;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: contain;
                 }
-                
+
+                .error .section-header::before {
+                    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23dc3545"><circle cx="12" cy="12" r="10"/><path fill="white" d="M13 17h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>');
+                }
+
+                .warning .section-header::before {
+                    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffc107"><path d="M12 2L1 21h22L12 2zm0 3.45l8.4 14.55H3.6L12 5.45z"/><path d="M11 16h2v2h-2zm0-7h2v5h-2z"/></svg>');
+                }
+
+                .info .section-header::before {
+                    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%230dcaf0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>');
+                }
+
                 .check-header {
                     padding: 10px;
                     background: #f8f9fa;
@@ -806,6 +842,10 @@
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                }
+                
+                .check-item {
+                    margin: 10px 0;
                 }
                 
                 .check-meta {
