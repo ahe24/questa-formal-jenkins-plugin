@@ -11,6 +11,7 @@ This is a Jenkins plugin that integrates Questa Formal static analysis results i
 *   Provides detailed information about each violation item in CDC reports.
 *   Displays design quality score, timestamp, and design name from Lint reports.
 *   Integrates with Jenkins build results to provide a clear overview of code quality.
+*   Normalizes file paths to use `PROJ_ROOT` prefix for better readability and consistency.
 
 ## Installation
 
@@ -33,11 +34,18 @@ The plugin expects the following format for the Lint and CDC report files:
 
 *   **Lint Report (`lint.rpt`)**:
     *   Summary information: `| Error (n)`, `| Warning (n)`, `| Info (n)`
-    *   Detailed information: `Check: <name> [Category: <category>] (<count>) <details>`
+    *   Detailed information: `Check: <n> [Category: <category>] (<count>) <details>`
     *   Metadata: `Design               : <design_name>`, `Timestamp            : <timestamp>`, `Design Quality Score : <score>`
 *   **CDC Report (`cdc.rpt`)**:
     *   Summary information: `Violations (n)`, `Cautions (n)`
-    *   Detailed information: `<name> (<count>) <details>`
+    *   Detailed information: `<n> (<count>) <details>`
+
+## File Path Normalization
+
+The plugin automatically normalizes file paths in the reports by:
+* Replacing Jenkins workspace paths with `PROJ_ROOT/` prefix
+* Maintaining consistent path format across different Jenkins environments
+* Improving readability of file locations in the reports
 
 ## Development
 
@@ -52,4 +60,24 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 ## License
 
-[Insert License Information Here] (e.g., MIT License)
+MIT License
+
+Copyright (c) 2024 Changseon Jo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
