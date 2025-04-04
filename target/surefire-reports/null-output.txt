@@ -1,3 +1,0 @@
-Running tests for io.jenkins.plugins:questa-formal-result:1.0-SNAPSHOT
-Apr 03, 2025 4:10:20 PM org.eclipse.jetty.util.log.Log initialized
-INFO: Logging initialized @1410ms to org.eclipse.jetty.util.log.Slf4jLog

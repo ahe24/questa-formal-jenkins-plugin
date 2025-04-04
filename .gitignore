@@ -51,3 +51,6 @@ screenshot*
 
 # jenkins log
 jenkins_log.txt
+
+# injected log
+surefire-reports/

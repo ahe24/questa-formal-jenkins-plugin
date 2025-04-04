@@ -2,8 +2,11 @@ package io.jenkins.plugins.questaformal;
 
 import hudson.model.Action;
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class QuestaFormalResultAction implements Action {
+    private static final ObjectMapper mapper = new ObjectMapper();
     private final String lintDesign;
     private final String lintTimestamp;
     private final double qualityScore;
@@ -106,5 +109,29 @@ public class QuestaFormalResultAction implements Action {
 
     public boolean isDebugMode() {
         return debugMode;
+    }
+
+    public String lintErrorsJson() {
+        try {
+            return mapper.writeValueAsString(getLintErrors());
+        } catch (JsonProcessingException e) {
+            return "[]";
+        }
+    }
+
+    public String lintWarningsJson() {
+        try {
+            return mapper.writeValueAsString(getLintWarnings());
+        } catch (JsonProcessingException e) {
+            return "[]";
+        }
+    }
+
+    public String lintInfoJson() {
+        try {
+            return mapper.writeValueAsString(getLintInfo());
+        } catch (JsonProcessingException e) {
+            return "[]";
+        }
     }
 } 
